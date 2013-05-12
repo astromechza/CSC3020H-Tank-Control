@@ -78,6 +78,7 @@ namespace Tank_Control
             fps.Update(m);
 
             camera.UpdatePosition();
+
             viewMatrix = camera.getViewMatrix();
 
             base.Update(gameTime);

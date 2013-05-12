@@ -28,7 +28,7 @@ namespace Tank_Control.Cameras
 
         /* MOVEMENT INITIAL */
         float height = 1024f;
-        float distance = 1024f;
+        float distance = 1536;
         float orbitAngle = 0f;
 
         Vector3 focus;
@@ -57,7 +57,7 @@ namespace Tank_Control.Cameras
                 case CameraMode.FirstPerson:
                     {
                         // Calculate position
-                        Vector3 pdiff = new Vector3(0, 380, 64f);
+                        Vector3 pdiff = new Vector3(0, 375, 64f);
                         Matrix po = Matrix.CreateTranslation(0, 0, 36f) * Matrix.CreateRotationY(tank.turretAngle) * Matrix.CreateTranslation(0, 0, -36f) * Matrix.CreateRotationY(tank.orientationAngle);
                         pdiff = Vector3.Transform(pdiff, po);
                         Vector3 targetPosition = tank.getPosition() + pdiff;
@@ -76,7 +76,7 @@ namespace Tank_Control.Cameras
 
                         // Calculate focus
                         Vector3 fdiff = new Vector3(0, 340, 1024f);
-                        Matrix fo = Matrix.CreateTranslation(0, 0, 36f) * Matrix.CreateRotationY(tank.turretAngle) * Matrix.CreateTranslation(0, 0, -36f) * Matrix.CreateRotationY(tank.orientationAngle);
+                        Matrix fo = Matrix.CreateTranslation(0, 0, 36f) * Matrix.CreateRotationX(tank.gunAngle) * Matrix.CreateRotationY(tank.turretAngle) * Matrix.CreateTranslation(0, 0, -36f) * Matrix.CreateRotationY(tank.orientationAngle);
                         
                         Vector3 focusTarget = tank.getPosition() + Vector3.Transform(fdiff, fo);
                         if (focTweanActive && Vector3.DistanceSquared(this.focus, focusTarget) > 32f)
