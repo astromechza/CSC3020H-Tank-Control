@@ -35,7 +35,7 @@ namespace Tank_Control.Game_Objects
                 for (int x = 0; x <= width; x++)
                 {
                     vertices[y * verticesWidth + x].Position = rowstart + (Vector3.Right * cellSize * x);
-                    vertices[y * verticesWidth + x].Normal = Vector3.Backward;
+                    vertices[y * verticesWidth + x].Normal = Vector3.Up;
                     vertices[y * verticesWidth + x].TextureCoordinate = new Vector2(x , y );
 
                 }
@@ -72,8 +72,8 @@ namespace Tank_Control.Game_Objects
 
             quadEffect.FogEnabled = true;
             quadEffect.FogColor = Vector3.Zero;
-            quadEffect.FogEnd = 5000;
-            quadEffect.FogStart = 4000;
+            quadEffect.FogEnd = 5120;
+            quadEffect.FogStart = 4096;
 
         }
 

@@ -22,6 +22,7 @@ namespace Tank_Control
         Tank tank;
         Floor floor;
         FPSComponent fps;
+        RandomObject rob1, rob2;
 
         CombinedCamera camera;
 
@@ -40,6 +41,8 @@ namespace Tank_Control
             fps = new FPSComponent(this);
             tank = new Tank(this, new Vector3(0,0,0));
             floor = new Floor(this, new Vector3(0, 0, 0), 512, 40, 40);
+            rob1 = new RandomObject(this, new Vector3(2048, 140, 0));
+            rob2 = new RandomObject(this, new Vector3(2048, 140, 2048));
 
             camera = new CombinedCamera(tank, CameraMode.ThirdPerson, new Vector3(0,10000,-10000f));
         }
@@ -60,6 +63,8 @@ namespace Tank_Control
             tank.LoadContent(Content);
             floor.LoadContent(Content);
             fps.LoadContent(Content);
+            rob1.LoadContent(Content);
+            rob2.LoadContent(Content);
         }
 
         protected override void UnloadContent()
@@ -90,6 +95,8 @@ namespace Tank_Control
         {
             GraphicsDevice.Clear(Color.Black);
 
+            rob1.Draw();
+            rob2.Draw();
             floor.Draw();
             tank.Draw();
 

@@ -117,8 +117,8 @@ namespace Tank_Control.Game_Objects
                 {
                     effect.FogEnabled = true;
                     effect.FogColor = Vector3.Zero;
-                    effect.FogStart = 2048;
-                    effect.FogEnd = 4096;
+                    effect.FogStart = 4096;
+                    effect.FogEnd = 5120;
 
                     effect.World = currentBoneTransforms[mesh.ParentBone.Index] * wM;
                     effect.View = game.viewMatrix;

@@ -110,8 +110,10 @@
     <Compile Include="Cameras\CombinedCamera.cs" />
     <Compile Include="Game Objects\Floor.cs" />
     <Compile Include="Game Objects\GameObject.cs" />
+    <Compile Include="Game Objects\RandomObject.cs" />
     <Compile Include="Game Objects\Tank.cs" />
     <Compile Include="FPSComponent.cs" />
+    <Compile Include="Object Tree\QuadTree.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Game.cs" />
@@ -153,9 +155,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Object Tree\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />
   <!--
