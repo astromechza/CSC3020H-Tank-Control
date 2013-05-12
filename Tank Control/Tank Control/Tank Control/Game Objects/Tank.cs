@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Input;
 namespace Tank_Control.Game_Objects
 {
 
-    class Tank : GameObject
+    public class Tank : GameObject
     {
         #region BONE INDICES
         const int TANK_GEO = 0;
@@ -27,8 +27,16 @@ namespace Tank_Control.Game_Objects
         const int HATCH_GEO = 11;
         #endregion
 
-        #region Transform Constants
-        Matrix scale = Matrix.CreateScale(0.1f);
+        #region Speed Constants
+
+        const float C_MAXFORWARDSPEED = 10.0f;
+        const float C_MAXBACKWARDSPEED = -10.0f;
+        const float C_ACCELERATION = 0.5f;
+        const float C_DECCELERATION = 0.15f;
+
+        const float C_MAXSTEER = 0.78f;
+        const float C_STEERSPEED = 0.08f;
+
         #endregion
 
         Model model;
@@ -46,12 +54,16 @@ namespace Tank_Control.Game_Objects
         // Control states
         TankControlState controlState;
 
+        Matrix orientation = Matrix.Identity;
+        Vector3 localVelocity = Vector3.Zero;
+        Vector3 velocity = Vector3.Zero;
+
         // Model angles
         float steerAngle = 0.0f;
-        float orientationAngle = 0.0f;
-        float speed = 0f;
+        public float orientationAngle = 0.0f;
 
         float[] wheelrotations = new float[4];
+        // 
 
         public Tank(Game g, Vector3 p) : base(g, p)
         {
@@ -90,11 +102,13 @@ namespace Tank_Control.Game_Objects
                 currentTransformNeedsRebuild = false;
             }
 
+            Matrix wM = orientation * Matrix.CreateTranslation(this.position)  ;
+
             foreach (ModelMesh mesh in model.Meshes)
             {
                 foreach (BasicEffect effect in mesh.Effects)
                 {
-                    effect.World = currentBoneTransforms[mesh.ParentBone.Index] * scale;
+                    effect.World = currentBoneTransforms[mesh.ParentBone.Index] * wM;
                     effect.View = game.viewMatrix;
                     effect.Projection = game.projectionMatrix;
 
@@ -110,87 +124,70 @@ namespace Tank_Control.Game_Objects
 
             if (controlState.isSteeringLeft)
             {
-                steerAngle = MathHelper.Clamp(steerAngle + 0.08f, -0.79f, 0.79f);
+                steerAngle = MathHelper.Clamp(steerAngle + C_STEERSPEED, -C_MAXSTEER, C_MAXSTEER);
             }
             else if (controlState.isSteeringRight)
             {
-                steerAngle = MathHelper.Clamp(steerAngle - 0.08f, -0.79f, 0.79f);
+                steerAngle = MathHelper.Clamp(steerAngle - C_STEERSPEED, -C_MAXSTEER, C_MAXSTEER);
             } 
             else 
             {
                 if (steerAngle < 0)
                 {
-                    steerAngle = MathHelper.Clamp(steerAngle + 0.1f, -0.79f, 0);
+                    steerAngle = MathHelper.Clamp(steerAngle + C_STEERSPEED, -C_MAXSTEER, 0);
                 }
                 else if (steerAngle > 0)
                 {
-                    steerAngle = MathHelper.Clamp(steerAngle - 0.1f, 0, 0.79f);
+                    steerAngle = MathHelper.Clamp(steerAngle - C_STEERSPEED, 0, C_MAXSTEER);
                 }
             }
+
+
 
             bones[R_STEER_GEO].Transform = Matrix.CreateRotationY(steerAngle) * boneOriginTransforms[R_STEER_GEO];
             bones[L_STEER_GEO].Transform = Matrix.CreateRotationY(steerAngle) * boneOriginTransforms[L_STEER_GEO];
 
+
             if (controlState.isMovingForward)           // Accelerate forward
             {
-                speed = MathHelper.Clamp(speed + 0.5f, -10f, 10f);
+                localVelocity.Z = MathHelper.Clamp(localVelocity.Z + C_ACCELERATION, C_MAXBACKWARDSPEED, C_MAXFORWARDSPEED);
             }
             else if (controlState.isMovingBackward)     // Accelerate backward
             {
-                speed = MathHelper.Clamp(speed - 0.5f, -10f, 10f);
+                localVelocity.Z = MathHelper.Clamp(localVelocity.Z - C_ACCELERATION, C_MAXBACKWARDSPEED, C_MAXFORWARDSPEED);
             }
-            else                                        // Deccelerate
+            else
             {
-                if (speed > 0)
+                localVelocity = Vector3.SmoothStep(localVelocity, Vector3.Zero, C_DECCELERATION);
+            }
+
+            if (localVelocity.LengthSquared() > 0 )
+            {
+                if (steerAngle != 0)
                 {
-                    speed = MathHelper.Clamp(speed - 1f, 0, 10f);
+                    orientationAngle += (steerAngle / 20) * localVelocity.Z / 20;
+                    orientation = Matrix.CreateRotationY(orientationAngle);
                 }
-                else if (speed < 0)
-                {
-                    speed = MathHelper.Clamp(speed + 1f, -10f, 0);
-                }
-            }
 
-            if (speed > 0)
+                velocity = Vector3.Transform(localVelocity, orientation);
+            }
+            
+            if (velocity.LengthSquared() > 0)
             {
-                orientationAngle = orientationAngle + steerAngle / 20;
-
-                Quaternion q = Quaternion.CreateFromAxisAngle(Vector3.Up, orientationAngle);
-
-                Vector3 add = Vector3.Transform(new Vector3(0f, 0f, speed*1.2f), q) ;
-
-                position += add;
-
-                bones[TANK_GEO].Transform =  Matrix.CreateRotationY(orientationAngle) * boneOriginTransforms[TANK_GEO] * Matrix.CreateTranslation(position);
-
-                wheelrotations[0] += speed / 150;
-                wheelrotations[1] += speed / 150;
-                wheelrotations[2] += speed / 150;
-                wheelrotations[3] += speed / 150;
-
-                bones[L_FRONT_WHEEL_GEO].Transform = Matrix.CreateRotationX(wheelrotations[0]) * boneOriginTransforms[L_FRONT_WHEEL_GEO];
-                bones[R_FRONT_WHEEL_GEO].Transform = Matrix.CreateRotationX(wheelrotations[1]) * boneOriginTransforms[R_FRONT_WHEEL_GEO];
-
-                bones[L_BACK_WHEEL_GEO].Transform = Matrix.CreateRotationX(wheelrotations[3]) * boneOriginTransforms[L_BACK_WHEEL_GEO];
-                bones[R_BACK_WHEEL_GEO].Transform = Matrix.CreateRotationX(wheelrotations[2]) * boneOriginTransforms[R_BACK_WHEEL_GEO];
-
-            }
-            else if (speed < 0)
-            {
-                orientationAngle = orientationAngle - steerAngle / 20;
-
-                Quaternion q = Quaternion.CreateFromAxisAngle(Vector3.Up, orientationAngle);
-
-                Vector3 add = Vector3.Transform(new Vector3(0f, 0f, speed * 1.5f), q);
-
-                position += add;
-
-                bones[TANK_GEO].Transform =  Matrix.CreateRotationY(orientationAngle) * boneOriginTransforms[TANK_GEO] * Matrix.CreateTranslation(position);
+                position += velocity;
             }
 
 
+            wheelrotations[0] += (localVelocity.Z + steerAngle*2) / 130;
+            wheelrotations[1] += (localVelocity.Z - steerAngle*2) / 130;
 
+            wheelrotations[2] += (localVelocity.Z + steerAngle) / 200;
+            wheelrotations[3] += (localVelocity.Z - steerAngle) / 200;
 
+            bones[L_FRONT_WHEEL_GEO].Transform = Matrix.CreateRotationX(wheelrotations[0]) * boneOriginTransforms[L_FRONT_WHEEL_GEO];
+            bones[R_FRONT_WHEEL_GEO].Transform = Matrix.CreateRotationX(wheelrotations[1]) * boneOriginTransforms[R_FRONT_WHEEL_GEO];
+            bones[R_BACK_WHEEL_GEO].Transform = Matrix.CreateRotationX(wheelrotations[2]) * boneOriginTransforms[R_BACK_WHEEL_GEO];
+            bones[L_BACK_WHEEL_GEO].Transform = Matrix.CreateRotationX(wheelrotations[3]) * boneOriginTransforms[L_BACK_WHEEL_GEO];
 
             currentTransformNeedsRebuild = true;
         }

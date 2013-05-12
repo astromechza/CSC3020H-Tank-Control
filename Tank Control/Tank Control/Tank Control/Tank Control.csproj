@@ -107,6 +107,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cameras\ThirdPCamera.cs" />
+    <Compile Include="Cameras\TrackingCamera.cs" />
     <Compile Include="Game Objects\Floor.cs" />
     <Compile Include="Game Objects\GameObject.cs" />
     <Compile Include="Game Objects\Tank.cs" />

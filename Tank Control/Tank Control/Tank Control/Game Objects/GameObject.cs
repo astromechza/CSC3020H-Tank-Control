@@ -29,6 +29,10 @@ namespace Tank_Control.Game_Objects
 
         public abstract void Update(double elapsedMillis);
 
+        public Vector3 getPosition()
+        {
+            return position;
+        }
 
     }
 }

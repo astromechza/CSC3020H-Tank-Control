@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Tank_Control.Game_Objects;
+using Tank_Control.Cameras;
 
 namespace Tank_Control
 {
@@ -21,6 +22,8 @@ namespace Tank_Control
         Tank tank;
         Floor floor;
         FPSComponent fps;
+
+        TrackingCamera camera;
 
         // View and Projection Matrices
         public Matrix viewMatrix;
@@ -35,19 +38,17 @@ namespace Tank_Control
             Content.RootDirectory = "Content";
 
             fps = new FPSComponent(this);
-
             tank = new Tank(this, new Vector3(0,0,0));
-            floor = new Floor(this, new Vector3(0, 0, 0), 1024, 1024);
+            floor = new Floor(this, new Vector3(0, 0, 0), 8192, 8192);
+            camera = new ThirdPCamera(new Vector3(128f, 128f, 128f), tank, 2048f, 1024f, 0.2f);
         }
 
         protected override void Initialize()
         {
             // Create Projection Matrix
             projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(45.0f), GraphicsDevice.Viewport.AspectRatio, 1f, 10000);
-            Vector3 center = new Vector3(0f, 0f, 0f);
-            Vector3 pos = new Vector3(128f, 128f, 128f);
-            viewMatrix = Matrix.CreateLookAt(pos, center, Vector3.Up);
 
+            viewMatrix = camera.getViewMatrix();
 
             base.Initialize();
         }
@@ -73,6 +74,10 @@ namespace Tank_Control
             double m = gameTime.ElapsedGameTime.TotalMilliseconds;
             tank.Update(m);
             fps.Update(m);
+
+            camera.UpdatePosition();
+            viewMatrix = camera.getViewMatrix();
+
             base.Update(gameTime);
         }
 
