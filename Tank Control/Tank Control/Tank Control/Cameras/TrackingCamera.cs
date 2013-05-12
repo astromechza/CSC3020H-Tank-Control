@@ -24,9 +24,6 @@ namespace Tank_Control.Cameras
 
         public abstract void UpdatePosition();
 
-
-
-
-
+        public abstract void handleInput();
     }
 }

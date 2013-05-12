@@ -39,7 +39,7 @@ namespace Tank_Control
 
             fps = new FPSComponent(this);
             tank = new Tank(this, new Vector3(0,0,0));
-            floor = new Floor(this, new Vector3(0, 0, 0), 8192, 8192);
+            floor = new Floor(this, new Vector3(0, 0, 0), 16384, 16384);
             camera = new ThirdPCamera(new Vector3(0, 10000f, -10000f), tank, 2048f, 1024f, 0.15f);
         }
 
@@ -70,6 +70,7 @@ namespace Tank_Control
         {
 
             tank.handleInput();
+            camera.handleInput();
 
             double m = gameTime.ElapsedGameTime.TotalMilliseconds;
             tank.Update(m);

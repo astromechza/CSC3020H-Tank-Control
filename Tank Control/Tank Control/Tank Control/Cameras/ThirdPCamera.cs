@@ -4,11 +4,20 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Tank_Control.Game_Objects;
+using Microsoft.Xna.Framework.Input;
 
 namespace Tank_Control.Cameras
 {
     public class ThirdPCamera : TrackingCamera
     {
+
+        const float C_MAXHEIGHT = 8196;
+        const float C_MINHEIGHT = 512;
+        const float C_DELTAHEIGHT = 16;
+
+        const float C_MAXDISTANCE = 8196;
+        const float C_MINDISTANCE = 512;
+        const float C_DELTADISTANCE = 16;
 
         private float distanceFromTarget;
         private float heightAboveGround;
@@ -46,6 +55,32 @@ namespace Tank_Control.Cameras
 
 
             return t;
+
+        }
+
+        public override void handleInput()
+        {
+            KeyboardState currentKeyboardState = Keyboard.GetState();
+
+            if (currentKeyboardState.IsKeyDown(Keys.I))
+            {
+                heightAboveGround = MathHelper.Clamp(heightAboveGround + C_DELTAHEIGHT, C_MINHEIGHT, C_MAXHEIGHT);
+            }
+
+            if (currentKeyboardState.IsKeyDown(Keys.K))
+            {
+                heightAboveGround = MathHelper.Clamp(heightAboveGround - C_DELTAHEIGHT, C_MINHEIGHT, C_MAXHEIGHT);
+            }
+
+            if (currentKeyboardState.IsKeyDown(Keys.L))
+            {
+                distanceFromTarget = MathHelper.Clamp(distanceFromTarget + C_DELTADISTANCE, C_MINDISTANCE, C_MAXDISTANCE);
+            }
+
+            if (currentKeyboardState.IsKeyDown(Keys.O))
+            {
+                distanceFromTarget = MathHelper.Clamp(distanceFromTarget - C_DELTADISTANCE, C_MINDISTANCE, C_MAXDISTANCE);
+            }
 
         }
 
