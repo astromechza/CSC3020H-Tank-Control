@@ -29,17 +29,17 @@ namespace Tank_Control.Game_Objects
 
         #region Speed Constants
 
-        const float C_MAXFORWARDSPEED = 10.0f;
+        const float C_MAXFORWARDSPEED = 15.0f;
         const float C_MAXBACKWARDSPEED = -10.0f;
         const float C_ACCELERATION = 0.5f;
         const float C_DECCELERATION = 0.15f;
 
-        const float C_MAXSTEER = 0.78f;
+        const float C_MAXSTEER = 0.5f;
         const float C_STEERSPEED = 0.08f;
 
         const float C_GUNMAXANGLE = 0.0f;
         const float C_GUNMINANGLE = -0.6f;
-        const float C_GUNANGLESPEED = 0.008f;
+        const float C_GUNANGLESPEED = 0.004f;
 
         #endregion
 
@@ -62,8 +62,8 @@ namespace Tank_Control.Game_Objects
         Vector3 localVelocity = Vector3.Zero;
         Vector3 velocity = Vector3.Zero;
 
-        float turretAngle = 0.0f;
-        float gunAngle = 0.0f;
+        public float turretAngle = 0.0f;
+        public float gunAngle = 0.0f;
 
         // Model angles
         float steerAngle = 0.0f;
