@@ -23,7 +23,7 @@ namespace Tank_Control
         Floor floor;
         FPSComponent fps;
 
-        TrackingCamera camera;
+        CombinedCamera camera;
 
         // View and Projection Matrices
         public Matrix viewMatrix;
@@ -40,8 +40,8 @@ namespace Tank_Control
             fps = new FPSComponent(this);
             tank = new Tank(this, new Vector3(0,0,0));
             floor = new Floor(this, new Vector3(0, 0, 0), 16384, 16384);
-            //camera = new ThirdPCamera(new Vector3(0, 10000f, -10000f), tank, 2048f, 1024f, 0.15f);
-            camera = new FirstPCamera(tank);
+
+            camera = new CombinedCamera(tank, CameraMode.ThirdPerson, new Vector3(0,10000,-10000f));
         }
 
         protected override void Initialize()
