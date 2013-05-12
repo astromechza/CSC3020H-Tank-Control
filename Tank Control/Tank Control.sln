@@ -1,0 +1,24 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C# Express 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tank Control", "Tank Control\Tank Control\Tank Control.csproj", "{B2674E0B-79C6-4A2F-8863-88A9F802E4B0}"
+EndProject
+Project("{96E2B04D-8817-42C6-938A-82C39BA4D311}") = "Tank ControlContent", "Tank Control\Tank ControlContent\Tank ControlContent.contentproj", "{32DF16EE-54C4-48BA-AA43-D4281CCC4A9F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B2674E0B-79C6-4A2F-8863-88A9F802E4B0}.Debug|x86.ActiveCfg = Debug|x86
+		{B2674E0B-79C6-4A2F-8863-88A9F802E4B0}.Debug|x86.Build.0 = Debug|x86
+		{B2674E0B-79C6-4A2F-8863-88A9F802E4B0}.Release|x86.ActiveCfg = Release|x86
+		{B2674E0B-79C6-4A2F-8863-88A9F802E4B0}.Release|x86.Build.0 = Release|x86
+		{32DF16EE-54C4-48BA-AA43-D4281CCC4A9F}.Debug|x86.ActiveCfg = Debug|x86
+		{32DF16EE-54C4-48BA-AA43-D4281CCC4A9F}.Release|x86.ActiveCfg = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
