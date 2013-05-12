@@ -37,6 +37,10 @@ namespace Tank_Control.Game_Objects
         const float C_MAXSTEER = 0.78f;
         const float C_STEERSPEED = 0.08f;
 
+        const float C_GUNMAXANGLE = 0.0f;
+        const float C_GUNMINANGLE = -0.6f;
+        const float C_GUNANGLESPEED = 0.008f;
+
         #endregion
 
         Model model;
@@ -57,6 +61,9 @@ namespace Tank_Control.Game_Objects
         Matrix orientation = Matrix.Identity;
         Vector3 localVelocity = Vector3.Zero;
         Vector3 velocity = Vector3.Zero;
+
+        float turretAngle = 0.0f;
+        float gunAngle = 0.0f;
 
         // Model angles
         float steerAngle = 0.0f;
@@ -122,6 +129,31 @@ namespace Tank_Control.Game_Objects
         public override void Update(double elapsedMillis)
         {
 
+            // TURRET
+
+            if (controlState.turretRotatingLeft)
+            {
+                turretAngle += 0.05f;
+            }
+            else if (controlState.turretRotatingRight)
+            {
+                turretAngle -= 0.05f;
+            }
+
+            bones[TURRET_GEO].Transform = Matrix.CreateRotationY(turretAngle) * boneOriginTransforms[TURRET_GEO];
+
+            if (controlState.gunMovingUp)
+            {
+                gunAngle = MathHelper.Clamp(gunAngle + C_GUNANGLESPEED, C_GUNMINANGLE, C_GUNMAXANGLE);
+            }
+            else if (controlState.gunMovingDown)
+            {
+                gunAngle = MathHelper.Clamp(gunAngle - C_GUNANGLESPEED, C_GUNMINANGLE, C_GUNMAXANGLE);
+            }
+            bones[CANON_GEO].Transform = Matrix.CreateRotationX(gunAngle) * boneOriginTransforms[CANON_GEO];
+
+            // STEERAGE
+
             if (controlState.isSteeringLeft)
             {
                 steerAngle = MathHelper.Clamp(steerAngle + C_STEERSPEED, -C_MAXSTEER, C_MAXSTEER);
@@ -141,8 +173,6 @@ namespace Tank_Control.Game_Objects
                     steerAngle = MathHelper.Clamp(steerAngle - C_STEERSPEED, 0, C_MAXSTEER);
                 }
             }
-
-
 
             bones[R_STEER_GEO].Transform = Matrix.CreateRotationY(steerAngle) * boneOriginTransforms[R_STEER_GEO];
             bones[L_STEER_GEO].Transform = Matrix.CreateRotationY(steerAngle) * boneOriginTransforms[L_STEER_GEO];
@@ -197,26 +227,45 @@ namespace Tank_Control.Game_Objects
             KeyboardState currentKeyboardState = Keyboard.GetState();
 
             controlState.reset();
-            if (currentKeyboardState.IsKeyDown(Keys.Left))
+            if (currentKeyboardState.IsKeyDown(Keys.A))
             {
                 controlState.isSteeringLeft = true;
             }
 
-            if (currentKeyboardState.IsKeyDown(Keys.Right))
+            if (currentKeyboardState.IsKeyDown(Keys.D))
             {
                 controlState.isSteeringRight = true;
             }
 
-            if (currentKeyboardState.IsKeyDown(Keys.Up))
+            if (currentKeyboardState.IsKeyDown(Keys.W))
             {
                 controlState.isMovingForward = true;
             }
 
-            if (currentKeyboardState.IsKeyDown(Keys.Down))
+            if (currentKeyboardState.IsKeyDown(Keys.S))
             {
                 controlState.isMovingBackward = true;
             }
 
+            if (currentKeyboardState.IsKeyDown(Keys.Left))
+            {
+                controlState.turretRotatingLeft = true;
+            }
+
+            if (currentKeyboardState.IsKeyDown(Keys.Right))
+            {
+                controlState.turretRotatingRight = true;
+            }
+
+            if (currentKeyboardState.IsKeyDown(Keys.Up))
+            {
+                controlState.gunMovingUp = true;
+            }
+
+            if (currentKeyboardState.IsKeyDown(Keys.Down))
+            {
+                controlState.gunMovingDown = true;
+            }
 
 
         }
@@ -224,16 +273,21 @@ namespace Tank_Control.Game_Objects
 
     public class TankControlState
     {
+        // movement
         public bool isSteeringLeft, isSteeringRight, isMovingForward, isMovingBackward;
+        // turret
+        public bool turretRotatingLeft, turretRotatingRight, gunMovingUp, gunMovingDown = false;
 
         public TankControlState()
         {
             isSteeringLeft = isSteeringRight = isMovingBackward = isMovingForward = false;
+            turretRotatingLeft = turretRotatingRight = gunMovingUp = gunMovingDown = false;
         }
 
         public void reset()
         {
             isSteeringLeft = isSteeringRight = isMovingBackward = isMovingForward = false;
+            turretRotatingLeft = turretRotatingRight = gunMovingUp = gunMovingDown = false;
         }
     }
 }
