@@ -10,50 +10,53 @@ namespace Tank_Control.Game_Objects
 {
     class Floor : GameObject
     {
-
+        int verticesWidth;
+        int verticesLong;
         VertexPositionNormalTexture[] vertices;
         short[] indices;
 
         Texture2D texture;
         BasicEffect quadEffect;
 
-        public Floor(Game g, Vector3 origin, float width, float length) : base(g, origin)
+        public Floor(Game g, Vector3 origin, int cellSize, int width, int length) : base(g, origin)
         {
-            /*
-             * 1--3
-             * |  |
-             * 0--2
-             */
-            vertices = new VertexPositionNormalTexture[4];
-            Vector3 n = Vector3.Backward;
-            Vector3 up = Vector3.Up;
-            Vector3 l = Vector3.Cross(n, up);
-            Vector3 uc = (Vector3.Forward * length / 2) + origin;
+            verticesWidth = width + 1;
+            verticesLong = length + 1;
+            vertices = new VertexPositionNormalTexture[verticesWidth * verticesLong];
 
-            vertices[1].Position = uc + (Vector3.Left * width / 2);
-            vertices[1].TextureCoordinate = new Vector2(0, 0);
-            vertices[1].Normal = n;
+            // First calculate top left corner
+            Vector3 tl = origin + (Vector3.Left * (width / 2) * cellSize) + (Vector3.Forward * (length / 2) * cellSize);
 
-            vertices[3].Position = uc - (Vector3.Left * width / 2);
-            vertices[3].TextureCoordinate = new Vector2(8, 0);
-            vertices[3].Normal = n;
+            // first loop construct vertices
+            for (int y = 0; y <= length; y++)
+            {
+                Vector3 rowstart = tl + (Vector3.Backward * cellSize * y);
 
-            vertices[0].Position = vertices[1].Position - (Vector3.Forward * length);
-            vertices[0].TextureCoordinate = new Vector2(0, 8);
-            vertices[0].Normal = n;
+                for (int x = 0; x <= width; x++)
+                {
+                    vertices[y * verticesWidth + x].Position = rowstart + (Vector3.Right * cellSize * x);
+                    vertices[y * verticesWidth + x].Normal = Vector3.Backward;
+                    vertices[y * verticesWidth + x].TextureCoordinate = new Vector2(x , y );
 
-            vertices[2].Position = vertices[3].Position - (Vector3.Forward * length);
-            vertices[2].TextureCoordinate = new Vector2(8, 8);
-            vertices[2].Normal = n;
+                }
+            }
 
-            indices = new short[6];
-            indices[0] = 0;
-            indices[1] = 1;
-            indices[2] = 2;
-            indices[3] = 2;
-            indices[4] = 1;
-            indices[5] = 3;
-             
+            // now create indices
+            indices = new short[width*length*6];
+
+            for (int y = 0; y < length; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    indices[(y * width + x) * 6 + 0] = (short)(y * verticesWidth + x + 0);
+                    indices[(y * width + x) * 6 + 1] = (short)(y * verticesWidth + x + verticesWidth + 1);
+                    indices[(y * width + x) * 6 + 2] = (short)(y * verticesWidth + x + verticesWidth);
+                    indices[(y * width + x) * 6 + 3] = (short)(y * verticesWidth + x + 0);
+                    indices[(y * width + x) * 6 + 4] = (short)(y * verticesWidth + x + 1);
+                    indices[(y * width + x) * 6 + 5] = (short)(y * verticesWidth + x + verticesWidth + 1);
+                }
+            }
+
         }
 
         public override void LoadContent(ContentManager contentMan)
@@ -66,17 +69,24 @@ namespace Tank_Control.Game_Objects
             quadEffect.World = Matrix.Identity;
             quadEffect.TextureEnabled = true;
             quadEffect.Texture = texture;
+
+            quadEffect.FogEnabled = true;
+            quadEffect.FogColor = Vector3.Zero;
+            quadEffect.FogEnd = 5000;
+            quadEffect.FogStart = 4000;
+
         }
 
         public override void Draw()
         {
             quadEffect.View = game.viewMatrix;
             quadEffect.Projection = game.projectionMatrix;
+            
+
             foreach (EffectPass pass in quadEffect.CurrentTechnique.Passes)
-            {
+            {                
                 pass.Apply();
-                game.graphics.GraphicsDevice.DrawUserIndexedPrimitives<VertexPositionNormalTexture>
-                    (PrimitiveType.TriangleList, vertices, 0, 4, indices, 0, 2); 
+                game.graphics.GraphicsDevice.DrawUserIndexedPrimitives<VertexPositionNormalTexture> (PrimitiveType.TriangleList, vertices, 0, vertices.Length, indices, 0, indices.Length/3); 
             }
         }
 

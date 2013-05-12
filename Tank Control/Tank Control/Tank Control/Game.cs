@@ -39,7 +39,7 @@ namespace Tank_Control
 
             fps = new FPSComponent(this);
             tank = new Tank(this, new Vector3(0,0,0));
-            floor = new Floor(this, new Vector3(0, 0, 0), 16384, 16384);
+            floor = new Floor(this, new Vector3(0, 0, 0), 512, 40, 40);
 
             camera = new CombinedCamera(tank, CameraMode.ThirdPerson, new Vector3(0,10000,-10000f));
         }
@@ -70,10 +70,11 @@ namespace Tank_Control
         protected override void Update(GameTime gameTime)
         {
 
+            double m = gameTime.ElapsedGameTime.TotalMilliseconds;
+
             tank.handleInput();
             camera.handleInput();
 
-            double m = gameTime.ElapsedGameTime.TotalMilliseconds;
             tank.Update(m);
             fps.Update(m);
 
@@ -87,7 +88,7 @@ namespace Tank_Control
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.Black);
 
             floor.Draw();
             tank.Draw();
