@@ -64,16 +64,15 @@ namespace Tank_Control.Game_Objects
             texture = contentMan.Load<Texture2D>("sand");
 
             quadEffect = new BasicEffect(this.game.graphics.GraphicsDevice);
-            quadEffect.EnableDefaultLighting();
-            quadEffect.PreferPerPixelLighting = true;
+
+
+            game.addLightingToEffect(quadEffect);
+
             quadEffect.World = Matrix.Identity;
             quadEffect.TextureEnabled = true;
             quadEffect.Texture = texture;
 
-            quadEffect.FogEnabled = true;
-            quadEffect.FogColor = Vector3.Zero;
-            quadEffect.FogEnd = 5120;
-            quadEffect.FogStart = 4096;
+            game.addFogToEffect(quadEffect);
 
         }
 

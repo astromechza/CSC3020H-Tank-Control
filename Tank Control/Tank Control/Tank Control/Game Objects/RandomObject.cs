@@ -60,11 +60,11 @@ namespace Tank_Control.Game_Objects
             {
                 foreach (BasicEffect effect in mesh.Effects)
                 {
-                    effect.EnableDefaultLighting();
-                    effect.FogEnabled = true;
-                    effect.FogColor = Vector3.Zero;
-                    effect.FogStart = 4096;
-                    effect.FogEnd = 5120;
+
+                    game.addLightingToEffect(effect);
+
+                    game.addFogToEffect(effect); 
+
                     effect.TextureEnabled = true;
                     effect.Texture = tex;
                     effect.World = boneOriginTransforms[mesh.ParentBone.Index];

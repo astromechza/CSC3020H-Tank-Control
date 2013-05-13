@@ -121,17 +121,13 @@ namespace Tank_Control.Game_Objects
             {
                 foreach (BasicEffect effect in mesh.Effects)
                 {
-                    effect.FogEnabled = true;
-                    effect.FogColor = Vector3.Zero;
-                    effect.FogStart = 4096;
-                    effect.FogEnd = 5120;
+                    game.addFogToEffect(effect);
 
                     effect.World = currentBoneTransforms[mesh.ParentBone.Index] * wM;
                     effect.View = game.viewMatrix;
                     effect.Projection = game.projectionMatrix;
 
-                    effect.EnableDefaultLighting();
-                    effect.PreferPerPixelLighting = true;                    
+                    game.addLightingToEffect(effect);                
                 }
                 mesh.Draw();
             }
