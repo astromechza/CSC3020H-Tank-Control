@@ -108,6 +108,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cameras\CombinedCamera.cs" />
+    <Compile Include="Collidables\CircleCollidable.cs" />
+    <Compile Include="Collidables\Collidable.cs" />
+    <Compile Include="Collidables\AARectangleCollidable.cs" />
+    <Compile Include="Collidables\OARectangleCollidable.cs" />
+    <Compile Include="Collidables\Utils.cs" />
+    <Compile Include="Dbg Drawers\LineDrawer.cs" />
+    <Compile Include="Dbg Drawers\RectangleDrawer.cs" />
     <Compile Include="Game Objects\Floor.cs" />
     <Compile Include="Game Objects\GameObject.cs" />
     <Compile Include="Game Objects\RandomObject.cs" />

@@ -25,7 +25,7 @@ namespace C3.XNA
         /// <summary>
         /// The rectangle that defines the object's boundaries.
         /// </summary>
-        Rectangle Rect { get; }
+        Rectangle getRectangle();
     }
 
     /// <summary>
@@ -554,19 +554,19 @@ namespace C3.XNA
             // If a child can't contain an object, it will live in this Quad
             QuadTreeNode<T> destTree = this;
 
-            if (childTL.QuadRect.Contains(item.Data.Rect))
+            if (childTL.QuadRect.Contains(item.Data.getRectangle()))
             {
                 destTree = childTL;
             }
-            else if (childTR.QuadRect.Contains(item.Data.Rect))
+            else if (childTR.QuadRect.Contains(item.Data.getRectangle()))
             {
                 destTree = childTR;
             }
-            else if (childBL.QuadRect.Contains(item.Data.Rect))
+            else if (childBL.QuadRect.Contains(item.Data.getRectangle()))
             {
                 destTree = childBL;
             }
-            else if (childBR.QuadRect.Contains(item.Data.Rect))
+            else if (childBR.QuadRect.Contains(item.Data.getRectangle()))
             {
                 destTree = childBR;
             }
@@ -578,7 +578,7 @@ namespace C3.XNA
         private void Relocate(QuadTreeObject<T> item)
         {
             // Are we still inside our parent?
-            if (QuadRect.Contains(item.Data.Rect))
+            if (QuadRect.Contains(item.Data.getRectangle()))
             {
                 // Good, have we moved inside any of our children?
                 if (childTL != null)
@@ -705,7 +705,7 @@ namespace C3.XNA
         internal void Insert(QuadTreeObject<T> item)
         {
             // If this quad doesn't contain the items rectangle, do nothing, unless we are the root
-            if (!rect.Contains(item.Data.Rect))
+            if (!rect.Contains(item.Data.getRectangle()))
             {
                 System.Diagnostics.Debug.Assert(parent == null, "We are not the root, and this object doesn't fit here. How did we get here?");
                 if (parent == null)
@@ -781,7 +781,7 @@ namespace C3.XNA
                     {
                         for (int i = 0; i < objects.Count; i++)
                         {
-                            if (searchRect.Intersects(objects[i].Data.Rect))
+                            if (searchRect.Intersects(objects[i].Data.getRectangle()))
                             {
                                 results.Add(objects[i].Data);
                             }

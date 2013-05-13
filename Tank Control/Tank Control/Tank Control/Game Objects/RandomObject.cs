@@ -6,6 +6,7 @@ using C3.XNA;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
+using Tank_Control.Collidables;
 
 namespace Tank_Control.Game_Objects
 {
@@ -14,21 +15,41 @@ namespace Tank_Control.Game_Objects
         Texture2D tex;
         Model model;
         Matrix[] boneOriginTransforms;
+        int type;
+        Collidable collide;
         
         public RandomObject(Game g, Vector3 o) : base(g, o)
         {
             Random r = new Random();
-            int type = r.Next(0, 4);
+            r.Next();
+            r.Next();
+            type = r.Next(0, 3);
+            System.Diagnostics.Debug.WriteLine(type);
         }
 
         public override void LoadContent(ContentManager contentMan)
         {
-            model = contentMan.Load<Model>("Cube");
+            switch (type)
+            {
+                case 0:
+                    model = contentMan.Load<Model>("Cube");
+                    collide = new AARectangleCollidable(this.position, 480);
+                    break;
+                case 1:
+                    model = contentMan.Load<Model>("Cone");
+                    collide = new CircleCollidable(this.position, 260);
+                    break;
+                case 2:
+                    model = contentMan.Load<Model>("Cylinder");
+                    collide = new CircleCollidable(this.position, 260);
+                    break;
+            }
+            
             tex = contentMan.Load<Texture2D>("rocks");
             boneOriginTransforms = new Matrix[model.Bones.Count];
             for (int i = 0; i < model.Bones.Count; i++)
             {
-                boneOriginTransforms[i] = model.Bones[i].Transform * Matrix.CreateScale(100) * Matrix.CreateTranslation(this.position);
+                boneOriginTransforms[i] = model.Bones[i].Transform * Matrix.CreateScale(130) * Matrix.CreateRotationX((float)Math.PI/2) * Matrix.CreateTranslation(this.position);
             }
         }
 
@@ -44,10 +65,8 @@ namespace Tank_Control.Game_Objects
                     effect.FogColor = Vector3.Zero;
                     effect.FogStart = 4096;
                     effect.FogEnd = 5120;
-
                     effect.TextureEnabled = true;
                     effect.Texture = tex;
-
                     effect.World = boneOriginTransforms[mesh.ParentBone.Index];
                     effect.View = game.viewMatrix;
                     effect.Projection = game.projectionMatrix;
@@ -57,14 +76,17 @@ namespace Tank_Control.Game_Objects
             }
         }
 
-        public override void Update(double elapsedMillis)
+        public override void Update(double elapsedMillis) { }
+
+        public Rectangle getRectangle()
         {
-            
+            return new Rectangle((int)this.position.X - 250, (int)this.position.Z - 250, 500, 500);
         }
 
-        public Rectangle Rect
+        public Collidable getCollidable()
         {
-            get { return new Rectangle(0,0,0,0); }
+            return collide;
         }
+
     }
 }

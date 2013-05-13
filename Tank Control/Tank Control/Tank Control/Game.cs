@@ -10,6 +10,9 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Tank_Control.Game_Objects;
 using Tank_Control.Cameras;
+using C3.XNA;
+using Tank_Control.Dbg_Drawers;
+using Tank_Control.Collidables;
 
 namespace Tank_Control
 {
@@ -22,7 +25,12 @@ namespace Tank_Control
         Tank tank;
         Floor floor;
         FPSComponent fps;
-        RandomObject rob1, rob2;
+        public QuadTree<RandomObject> quadTree;
+
+        LineDrawer ldrawer1;
+        LineDrawer ldrawer2;
+
+        RandomObject rob;
 
         CombinedCamera camera;
 
@@ -35,14 +43,21 @@ namespace Tank_Control
             graphics = new GraphicsDeviceManager(this);
             graphics.PreferredBackBufferWidth = 1280;
             graphics.PreferredBackBufferHeight = 720;
+            graphics.PreferMultiSampling = true;
+
+            //graphics.SynchronizeWithVerticalRetrace = false;
+            //IsFixedTimeStep = false;
 
             Content.RootDirectory = "Content";
 
             fps = new FPSComponent(this);
             tank = new Tank(this, new Vector3(0,0,0));
             floor = new Floor(this, new Vector3(0, 0, 0), 512, 40, 40);
-            rob1 = new RandomObject(this, new Vector3(2048, 140, 0));
-            rob2 = new RandomObject(this, new Vector3(2048, 140, 2048));
+
+            quadTree = new QuadTree<RandomObject>(-10240, -10240, 512 * 40, 512 * 40);
+
+            ldrawer1 = new LineDrawer(this, new CircleCollidable(new Vector3(0,0,0),10));
+            ldrawer2 = new LineDrawer(this, new AARectangleCollidable(new Vector3(0, 0, 0), 512, 1024));
 
             camera = new CombinedCamera(tank, CameraMode.ThirdPerson, new Vector3(0,10000,-10000f));
         }
@@ -54,6 +69,7 @@ namespace Tank_Control
 
             viewMatrix = camera.getViewMatrix();
 
+
             base.Initialize();
         }
 
@@ -63,8 +79,30 @@ namespace Tank_Control
             tank.LoadContent(Content);
             floor.LoadContent(Content);
             fps.LoadContent(Content);
-            rob1.LoadContent(Content);
-            rob2.LoadContent(Content);
+
+            ldrawer1.init();
+            ldrawer2.init();
+
+
+            Random r = new Random();
+
+            for (int i = 0; i < 100; i++)
+            {
+
+                int x = r.Next(-10240,10240);
+                int z = r.Next(-10240,10240);
+
+                RandomObject ro = new RandomObject(this, new Vector3(x, 183, z));
+                ro.LoadContent(Content);
+                quadTree.Add(ro);
+            }
+
+            rob = new RandomObject(this, new Vector3(3000, 183, 3000));
+            rob.LoadContent(Content);
+
+            ldrawer1.update(rob.getCollidable());
+
+            quadTree.Add(rob);
         }
 
         protected override void UnloadContent()
@@ -83,6 +121,9 @@ namespace Tank_Control
             tank.Update(m);
             fps.Update(m);
 
+
+            ldrawer2.update(tank.getCollidable());
+
             camera.UpdatePosition();
 
             viewMatrix = camera.getViewMatrix();
@@ -95,10 +136,17 @@ namespace Tank_Control
         {
             GraphicsDevice.Clear(Color.Black);
 
-            rob1.Draw();
-            rob2.Draw();
+
             floor.Draw();
             tank.Draw();
+            List<RandomObject> ol = quadTree.GetAllObjects();
+            foreach (var o in ol)
+            {
+                o.Draw();
+            }
+
+            ldrawer1.Draw();
+            ldrawer2.Draw();
 
             fps.Draw();
 

@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Tank_Control.Collidables;
 
 namespace Tank_Control.Game_Objects
 {
@@ -37,8 +38,8 @@ namespace Tank_Control.Game_Objects
         const float C_MAXSTEER = 0.5f;
         const float C_STEERSPEED = 0.08f;
 
-        const float C_GUNMAXANGLE = 0.0f;
-        const float C_GUNMINANGLE = -0.6f;
+        const float C_GUNMAXANGLE = 0.1f;
+        const float C_GUNMINANGLE = -0.9f;
         const float C_GUNANGLESPEED = 0.004f;
 
         #endregion
@@ -71,6 +72,11 @@ namespace Tank_Control.Game_Objects
 
         float[] wheelrotations = new float[4];
         // 
+
+        private Vector3 suboffset = new Vector3(0, 0, -25);
+
+        private Vector3 lastGoodPosition = new Vector3(0, 0, 0);
+        private float lastGoodOrientation = 0.0f;
 
         public Tank(Game g, Vector3 p) : base(g, p)
         {
@@ -134,8 +140,7 @@ namespace Tank_Control.Game_Objects
         public override void Update(double elapsedMillis)
         {
 
-            // TURRET
-
+            // Rotate turret if it should be rotating
             if (controlState.turretRotatingLeft)
             {
                 turretAngle += 0.05f;
@@ -144,9 +149,10 @@ namespace Tank_Control.Game_Objects
             {
                 turretAngle -= 0.05f;
             }
-
+            // apply current turret rotation to turret bone
             bones[TURRET_GEO].Transform = Matrix.CreateRotationY(turretAngle) * boneOriginTransforms[TURRET_GEO];
 
+            // Raise / Lower Gun depending on key
             if (controlState.gunMovingUp)
             {
                 gunAngle = MathHelper.Clamp(gunAngle + C_GUNANGLESPEED, C_GUNMINANGLE, C_GUNMAXANGLE);
@@ -155,10 +161,10 @@ namespace Tank_Control.Game_Objects
             {
                 gunAngle = MathHelper.Clamp(gunAngle - C_GUNANGLESPEED, C_GUNMINANGLE, C_GUNMAXANGLE);
             }
+            // Apply gun pitch to bone
             bones[CANON_GEO].Transform = Matrix.CreateRotationX(gunAngle) * boneOriginTransforms[CANON_GEO];
 
-            // STEERAGE
-
+            // If a steering key is down, modify the steering angle
             if (controlState.isSteeringLeft)
             {
                 steerAngle = MathHelper.Clamp(steerAngle + C_STEERSPEED, -C_MAXSTEER, C_MAXSTEER);
@@ -169,6 +175,7 @@ namespace Tank_Control.Game_Objects
             } 
             else 
             {
+                // Otherwise, decay the steering angle close to 0
                 if (steerAngle < 0)
                 {
                     steerAngle = MathHelper.Clamp(steerAngle + C_STEERSPEED, -C_MAXSTEER, 0);
@@ -179,10 +186,11 @@ namespace Tank_Control.Game_Objects
                 }
             }
 
+            // apply steering angle to both steering racks
             bones[R_STEER_GEO].Transform = Matrix.CreateRotationY(steerAngle) * boneOriginTransforms[R_STEER_GEO];
             bones[L_STEER_GEO].Transform = Matrix.CreateRotationY(steerAngle) * boneOriginTransforms[L_STEER_GEO];
 
-
+            // If a movement key is being held down then accelerate
             if (controlState.isMovingForward)           // Accelerate forward
             {
                 localVelocity.Z = MathHelper.Clamp(localVelocity.Z + C_ACCELERATION, C_MAXBACKWARDSPEED, C_MAXFORWARDSPEED);
@@ -191,33 +199,85 @@ namespace Tank_Control.Game_Objects
             {
                 localVelocity.Z = MathHelper.Clamp(localVelocity.Z - C_ACCELERATION, C_MAXBACKWARDSPEED, C_MAXFORWARDSPEED);
             }
-            else
+            else // deccelerate to 0
             {
-                localVelocity = Vector3.SmoothStep(localVelocity, Vector3.Zero, C_DECCELERATION);
+                if (localVelocity.LengthSquared() > 0.5)
+                {
+                    localVelocity = Vector3.SmoothStep(localVelocity, Vector3.Zero, C_DECCELERATION);
+                }
+                else
+                {    
+                    // clamp to zero
+                    localVelocity = Vector3.Zero;
+                }
             }
-
-            if (localVelocity.LengthSquared() > 0 )
+            // Only steer if the local velocity is greater than 1
+            if (localVelocity.LengthSquared() > 0)
             {
                 if (steerAngle != 0)
                 {
                     orientationAngle += (steerAngle / 20) * localVelocity.Z / 20;
-                    orientation = Matrix.CreateRotationY(orientationAngle);
                 }
 
+                // transform velocity by new orientation
                 velocity = Vector3.Transform(localVelocity, orientation);
+            }
+            else
+            {
+                velocity = Vector3.Zero;
             }
             
             if (velocity.LengthSquared() > 0)
             {
-                position += velocity;
+
+                // collision TIME!
+                bool didCollide = false;
+                List<RandomObject> possibles = game.quadTree.GetObjects(this.getRectangle());
+                foreach( RandomObject ro in possibles)
+                {
+                    if (this.getCollidable().collidesWith(ro.getCollidable()))
+                    {
+                        didCollide = true;
+                        break;
+                    }
+
+                }
+
+                if (didCollide)
+                {
+                    velocity = Vector3.Zero;
+                    localVelocity = Vector3.Zero;
+                    position = lastGoodPosition;
+                    orientationAngle = lastGoodOrientation;
+                }
+                else
+                {
+                    lastGoodPosition = position;
+                    lastGoodOrientation = orientationAngle;
+                    position += velocity;
+                }
+                orientation = Matrix.CreateRotationY(orientationAngle);
             }
 
 
-            wheelrotations[0] += (localVelocity.Z + steerAngle*2) / 130;
-            wheelrotations[1] += (localVelocity.Z - steerAngle*2) / 130;
+            // back wheels
+            if (localVelocity.Z > 0)
+            {
 
-            wheelrotations[2] += (localVelocity.Z + steerAngle) / 200;
-            wheelrotations[3] += (localVelocity.Z - steerAngle) / 200;
+                wheelrotations[1] += (localVelocity.Z + steerAngle * 5) / 150;
+                wheelrotations[0] += (localVelocity.Z - steerAngle * 5) / 150;
+
+                wheelrotations[2] += (localVelocity.Z + steerAngle * 5) / 200;
+                wheelrotations[3] += (localVelocity.Z - steerAngle * 5) / 200;
+            }
+            else if (localVelocity.Z < 0)
+            {
+                wheelrotations[1] += (localVelocity.Z - steerAngle * 5) / 150;
+                wheelrotations[0] += (localVelocity.Z + steerAngle * 5) / 150;
+
+                wheelrotations[2] += (localVelocity.Z - steerAngle * 5) / 200;
+                wheelrotations[3] += (localVelocity.Z + steerAngle * 5) / 200;
+            }
 
             bones[L_FRONT_WHEEL_GEO].Transform = Matrix.CreateRotationX(wheelrotations[0]) * boneOriginTransforms[L_FRONT_WHEEL_GEO];
             bones[R_FRONT_WHEEL_GEO].Transform = Matrix.CreateRotationX(wheelrotations[1]) * boneOriginTransforms[R_FRONT_WHEEL_GEO];
@@ -274,6 +334,17 @@ namespace Tank_Control.Game_Objects
 
 
         }
+
+        public Rectangle getRectangle()
+        {
+            return new Rectangle((int)this.position.X - 500, (int)this.position.Z - 500, 1000, 1000);
+        }
+
+        public Collidable getCollidable()
+        {
+            return new OARectangleCollidable(this.position, suboffset, this.orientationAngle, 620, 690);
+        }
+
     }
 
     public class TankControlState

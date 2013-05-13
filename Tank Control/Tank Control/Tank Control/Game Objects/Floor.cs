@@ -82,7 +82,6 @@ namespace Tank_Control.Game_Objects
             quadEffect.View = game.viewMatrix;
             quadEffect.Projection = game.projectionMatrix;
             
-
             foreach (EffectPass pass in quadEffect.CurrentTechnique.Passes)
             {                
                 pass.Apply();

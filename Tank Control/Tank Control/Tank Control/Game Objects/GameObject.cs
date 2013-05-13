@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
+using C3.XNA;
 
 namespace Tank_Control.Game_Objects
 {
-    public abstract class GameObject
+    public abstract class GameObject 
     {
         protected Game game;
         protected Vector3 position;
