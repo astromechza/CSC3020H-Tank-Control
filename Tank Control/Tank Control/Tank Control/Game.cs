@@ -27,7 +27,6 @@ namespace Tank_Control
         FPSComponent fps;
         public QuadTree<RandomObject> quadTree;
 
-        LineDrawer ldrawer1;
         LineDrawer ldrawer2;
 
         RandomObject rob;
@@ -56,7 +55,6 @@ namespace Tank_Control
 
             quadTree = new QuadTree<RandomObject>(-10240, -10240, 512 * 40, 512 * 40);
 
-            ldrawer1 = new LineDrawer(this, new CircleCollidable(new Vector3(0,0,0),10));
             ldrawer2 = new LineDrawer(this, new AARectangleCollidable(new Vector3(0, 0, 0), 512, 1024));
 
             camera = new CombinedCamera(tank, CameraMode.ThirdPerson, new Vector3(0,10000,-10000f));
@@ -80,7 +78,6 @@ namespace Tank_Control
             floor.LoadContent(Content);
             fps.LoadContent(Content);
 
-            ldrawer1.init();
             ldrawer2.init();
 
 
@@ -98,17 +95,11 @@ namespace Tank_Control
                     continue;
                 }
 
-                RandomObject ro = new RandomObject(this, new Vector3(x, 183, z));
+                RandomObject ro = new RandomObject(this, new Vector3(x, 0, z), r.Next(0, 3), r.Next(0, 4));
                 ro.LoadContent(Content);
                 quadTree.Add(ro);
             }
 
-            rob = new RandomObject(this, new Vector3(3000, 183, 3000));
-            rob.LoadContent(Content);
-
-            ldrawer1.update(rob.getCollidable());
-
-            quadTree.Add(rob);
         }
 
         protected override void UnloadContent()
@@ -182,7 +173,6 @@ namespace Tank_Control
                 o.Draw();
             }
 
-            ldrawer1.Draw();
             ldrawer2.Draw();
 
             fps.Draw();

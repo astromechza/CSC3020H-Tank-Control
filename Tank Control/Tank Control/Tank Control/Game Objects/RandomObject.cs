@@ -16,41 +16,64 @@ namespace Tank_Control.Game_Objects
         Model model;
         Matrix[] boneOriginTransforms;
         int type;
+        int textype;
         Collidable collide;
         
-        public RandomObject(Game g, Vector3 o) : base(g, o)
+        public RandomObject(Game g, Vector3 o, int type, int textype) : base(g, o)
         {
-            Random r = new Random();
-            r.Next();
-            r.Next();
-            type = r.Next(0, 3);
-            System.Diagnostics.Debug.WriteLine(type);
+            this.textype = textype;
+            this.type = type;
         }
 
         public override void LoadContent(ContentManager contentMan)
         {
+
+            Matrix shapeTransform = Matrix.Identity;
+            
             switch (type)
             {
                 case 0:
                     model = contentMan.Load<Model>("Cube");
                     collide = new AARectangleCollidable(this.position, 480);
+                    this.position.Y += 220;
+                    shapeTransform =  Matrix.CreateScale(130) * Matrix.CreateTranslation(this.position);
                     break;
                 case 1:
                     model = contentMan.Load<Model>("Cone");
-                    collide = new CircleCollidable(this.position, 260);
+                    collide = new CircleCollidable(this.position, 100);
+                    this.position.Y += 133;
+                    shapeTransform = Matrix.CreateScale(50) * Matrix.CreateRotationX((float)Math.PI / 2) * Matrix.CreateTranslation(this.position);
                     break;
                 case 2:
                     model = contentMan.Load<Model>("Cylinder");
-                    collide = new CircleCollidable(this.position, 260);
+                    collide = new CircleCollidable(this.position, 160);
+                    this.position.Y += 190;
+                    shapeTransform = Matrix.CreateScale(80) * Matrix.CreateRotationX((float)Math.PI / 2) * Matrix.CreateTranslation(this.position);
                     break;
             }
-            
-            tex = contentMan.Load<Texture2D>("rocks");
+
             boneOriginTransforms = new Matrix[model.Bones.Count];
             for (int i = 0; i < model.Bones.Count; i++)
             {
-                boneOriginTransforms[i] = model.Bones[i].Transform * Matrix.CreateScale(130) * Matrix.CreateRotationX((float)Math.PI/2) * Matrix.CreateTranslation(this.position);
+                boneOriginTransforms[i] = model.Bones[i].Transform * shapeTransform;
             }
+
+            switch (textype)
+            {
+                case 0:
+                    tex = contentMan.Load<Texture2D>("hazard");
+                    break;
+                case 1:
+                    tex = contentMan.Load<Texture2D>("rocks");
+                    break;
+                case 2:
+                    tex = contentMan.Load<Texture2D>("crate");
+                    break;
+                case 3:
+                    tex = contentMan.Load<Texture2D>("chess");
+                    break;
+            }
+
         }
 
         public override void Draw()

@@ -40,7 +40,7 @@ namespace Tank_Control.Game_Objects
 
         const float C_GUNMAXANGLE = 0.1f;
         const float C_GUNMINANGLE = -0.9f;
-        const float C_GUNANGLESPEED = 0.004f;
+        const float C_GUNANGLESPEED = 0.01f;
 
         #endregion
 
@@ -338,7 +338,7 @@ namespace Tank_Control.Game_Objects
 
         public Collidable getCollidable()
         {
-            return new OARectangleCollidable(this.position, suboffset, this.orientationAngle, 620, 690);
+            return new OARectangleCollidable(this.position, suboffset, this.orientationAngle, 600, 680);
         }
 
     }
