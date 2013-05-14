@@ -52,6 +52,7 @@ namespace Tank_Control
             lineheight = spriteFont.MeasureString("test").Y;
         }
 
+        
         public override void Draw()
         {
 
@@ -60,8 +61,6 @@ namespace Tank_Control
             {
                 spriteBatch.Begin();
                 spriteBatch.DrawString(spriteFont, "Tank Control by Ben Meier (MRXBEN001) ", new Vector2(10, 10 + (line++) * lineheight), Color.Yellow, 0f, Vector2.Zero, 1.0f, SpriteEffects.None, 0);
-
-                spriteBatch.DrawString(spriteFont, "Press ~ to toggle collision boxes ", new Vector2(10, 10 + (line++) * lineheight), Color.Yellow, 0f, Vector2.Zero, 1.0f, SpriteEffects.None, 0);
 
                 spriteBatch.DrawString(spriteFont, "FPS: " + fps.ToString(), new Vector2(10, 10 + (line++)*lineheight), Color.Yellow, 0f, Vector2.Zero, 1.0f, SpriteEffects.None, 0);
 

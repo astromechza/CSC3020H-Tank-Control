@@ -35,10 +35,10 @@ namespace Tank_Control.Collidables
         public override VertexPositionColor[] getPolygonVertices()
         {
             VertexPositionColor[] vertices = new VertexPositionColor[4];
-            vertices[0].Position = origin + new Vector3(-width / 2, 0, -length / 2);
-            vertices[1].Position = origin + new Vector3(width / 2, 0, -length / 2);
-            vertices[2].Position = origin + new Vector3(width / 2, 0, length / 2);
-            vertices[3].Position = origin + new Vector3(-width / 2, 0, length / 2);
+            vertices[0].Position = origin + new Vector3(-width / 2, 1, -length / 2);
+            vertices[1].Position = origin + new Vector3(width / 2, 1, -length / 2);
+            vertices[2].Position = origin + new Vector3(width / 2, 1, length / 2);
+            vertices[3].Position = origin + new Vector3(-width / 2, 1, length / 2);
             return vertices;
         }
 

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
-using C3.XNA;
 
 namespace Tank_Control.Game_Objects
 {

@@ -27,6 +27,7 @@ namespace Tank_Control.Game_Objects
             // First calculate top left corner
             Vector3 tl = origin + (Vector3.Left * (width / 2) * cellSize) + (Vector3.Forward * (length / 2) * cellSize);
 
+
             // first loop construct vertices
             for (int y = 0; y <= length; y++)
             {
@@ -61,7 +62,7 @@ namespace Tank_Control.Game_Objects
 
         public override void LoadContent(ContentManager contentMan)
         {
-            texture = contentMan.Load<Texture2D>("sand");
+            texture = contentMan.Load<Texture2D>("metal");
 
             quadEffect = new BasicEffect(this.game.graphics.GraphicsDevice);
 

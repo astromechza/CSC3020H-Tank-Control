@@ -10,7 +10,6 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Tank_Control.Game_Objects;
 using Tank_Control.Cameras;
-using C3.XNA;
 using Tank_Control.Dbg_Drawers;
 using Tank_Control.Collidables;
 
@@ -24,8 +23,10 @@ namespace Tank_Control
         PlatformID platform;
         Tank tank;
         Floor floor;
+
+        public List<RandomObject> randomObjects;
+
         HudOverlay hud;
-        public QuadTree quadTree;
         
         public CombinedCamera camera;
 
@@ -40,17 +41,16 @@ namespace Tank_Control
             graphics = new GraphicsDeviceManager(this);
             graphics.PreferredBackBufferWidth = 1280;
             graphics.PreferredBackBufferHeight = 720;
-            graphics.PreferMultiSampling = true;
 
             Content.RootDirectory = "Content";
 
             hud = new HudOverlay(this);
             tank = new Tank(this, new Vector3(0,0,0));
             floor = new Floor(this, new Vector3(0, 0, 0), 512, 40, 40);
-
-            quadTree = new QuadTree(-10240, -10240, 512 * 40, 512 * 40);
             
             camera = new CombinedCamera(tank, CameraMode.ThirdPerson, new Vector3(0,10000,-10000f));
+
+            randomObjects = new List<RandomObject>();
 
             OperatingSystem os = Environment.OSVersion;
             platform = os.Platform;
@@ -79,7 +79,9 @@ namespace Tank_Control
             ColliderDrawer.Init(this);
 
             Random r = new Random();
-            for (int i = 0; i < 100; i++)
+
+            int numbObjs = 100;
+            for (int i = 0; i < numbObjs; i++)
             {
 
                 int x = r.Next(-10240,10240);
@@ -93,7 +95,7 @@ namespace Tank_Control
 
                 RandomObject ro = new RandomObject(this, new Vector3(x, 0, z));
                 ro.LoadContent(Content);
-                quadTree.Add(ro);
+                randomObjects.Add(ro);
             }
             System.Diagnostics.Debug.WriteLine("Finished LoadContent");
 
@@ -108,30 +110,30 @@ namespace Tank_Control
         {            
             effect.PreferPerPixelLighting = true;
             effect.LightingEnabled = true;
-            effect.DirectionalLight0.DiffuseColor = new Vector3(0.2f, 0.2f, 0.5f);
-            effect.DirectionalLight0.SpecularColor = new Vector3(0.2f, 0.2f, 1.0f);
-            effect.DirectionalLight0.Direction = new Vector3(1, -1, 1);
+            effect.DirectionalLight0.DiffuseColor = new Vector3(0.0f, 0.0f, 0.5f);
+            effect.DirectionalLight0.SpecularColor = new Vector3(0.2f, 0.2f, 0.5f);
+            effect.DirectionalLight0.Direction = new Vector3(1, -0.3f, 0);
 
             effect.DirectionalLight1.Enabled = true;
 
             effect.DirectionalLight1.DiffuseColor = new Vector3(0.8f, 0.8f, 0.8f);
             effect.DirectionalLight1.SpecularColor = new Vector3(0.5f, 0.5f, 0.5f);
-            effect.DirectionalLight1.Direction = new Vector3(-1, -0.1f, 0);
+            effect.DirectionalLight1.Direction = new Vector3(-0.5f, -1, 0.86f);
 
             effect.DirectionalLight2.Enabled = true;
 
-            effect.DirectionalLight2.DiffuseColor = new Vector3(0.0f, 0.1f, 0.0f);
-            effect.DirectionalLight2.SpecularColor = new Vector3(0.0f, 0.5f, 0.0f);
-            effect.DirectionalLight2.Direction = Vector3.Transform(new Vector3(0, 0, 1), Matrix.CreateRotationY(tank.orientationAngle));
+            effect.DirectionalLight2.DiffuseColor = new Vector3(0.5f, 0.0f, 0.0f);
+            effect.DirectionalLight2.SpecularColor = new Vector3(0.5f, 0.0f, 0.0f);
+            effect.DirectionalLight2.Direction = new Vector3(-0.5f, 0, -0.86f);
 
-            effect.SpecularPower = 50f;
+            effect.SpecularPower = 100f;
         }
 
         public void addFogToEffect(BasicEffect effect)
         {
             effect.FogEnabled = true;
-            effect.FogColor = Vector3.Zero;
-            effect.FogStart = 4096;
+            effect.FogColor = Color.Black.ToVector3() ;
+            effect.FogStart = 6000;
             effect.FogEnd = 8000;
         }
 
@@ -141,8 +143,23 @@ namespace Tank_Control
             if (platform == PlatformID.Xbox)
             {
                 GamePadState gs = GamePad.GetState(PlayerIndex.One);
-                //tank.handleInput(gs);
-                //camera.handleInput(gs);
+                tank.handleInput(gs);
+                camera.handleInput(gs);
+
+                if (gs.IsButtonDown(Buttons.B))
+                {
+                    if (!tildeInKeyPress)
+                    {
+                        ColliderDrawer.Toggle();
+                        tildeInKeyPress = true;
+                    }
+                }
+                else
+                {
+                    tildeInKeyPress = false;
+                }
+
+                if (gs.IsButtonDown(Buttons.Back)) this.Exit();
             }
             else
             {
@@ -165,10 +182,7 @@ namespace Tank_Control
                     tildeInKeyPress = false;
                 }
 
-                if (ks.IsKeyDown(Keys.Escape))
-                {
-                    this.Exit();
-                }
+                if (ks.IsKeyDown(Keys.Escape)) this.Exit();
 
                 Mouse.SetPosition(1280 / 2, 720 / 2);
             }
@@ -202,10 +216,9 @@ namespace Tank_Control
 
             floor.Draw();
             tank.Draw();
-            List<RandomObject> ol = quadTree.GetAllObjects();
-            foreach (var o in ol)
+            foreach (var ro in randomObjects)
             {
-                o.Draw();
+                ro.Draw();
             }
 
             hud.Draw();

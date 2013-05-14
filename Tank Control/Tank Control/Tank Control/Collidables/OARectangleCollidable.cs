@@ -49,8 +49,18 @@ namespace Tank_Control.Collidables
                     Vector2 current = Utils.castVector3XZ(selfvertices[i%selfvertices.Length].Position);
                     if (Utils.pointInCircle(current, Utils.castVector3XZ(o.origin), o.radius)) return true;
 
+                    // check midpoint
                     Vector2 mid = (current + last) / 2;
                     if (Utils.pointInCircle(mid, Utils.castVector3XZ(o.origin), o.radius)) return true;
+
+                    // chekc mid1
+                    Vector2 mid1 = (mid + current) / 2;
+                    if (Utils.pointInCircle(mid1, Utils.castVector3XZ(o.origin), o.radius)) return true;
+
+                    // chekc mid2
+                    Vector2 mid2 = (mid + last) / 2;
+                    if (Utils.pointInCircle(mid2, Utils.castVector3XZ(o.origin), o.radius)) return true;
+                    
                     last = current;
                 }
                 return false;
@@ -66,8 +76,18 @@ namespace Tank_Control.Collidables
                     Vector2 current = Utils.castVector3XZ(selfvertices[i % selfvertices.Length].Position);
                     if (Utils.pointInAARectangle(current, Utils.castVector3XZ(o.origin), o.width, o.length)) return true;
 
+                    // check midpoint
                     Vector2 mid = (current + last) / 2;
                     if (Utils.pointInAARectangle(mid, Utils.castVector3XZ(o.origin), o.width, o.length)) return true;
+
+                    // chekc mid1
+                    Vector2 mid1 = (mid + current) / 2;
+                    if (Utils.pointInAARectangle(mid1, Utils.castVector3XZ(o.origin), o.width, o.length)) return true;
+
+                    // chekc mid2
+                    Vector2 mid2 = (mid + last) / 2;
+                    if (Utils.pointInAARectangle(mid2, Utils.castVector3XZ(o.origin), o.width, o.length)) return true;
+                    
                     last = current;
                 }
                 return false;
@@ -83,22 +103,22 @@ namespace Tank_Control.Collidables
             Matrix r = Matrix.CreateRotationY(angle);
 
             // 0 
-            Vector3 t = new Vector3(width / 2, 0, length / 2) + suboffset;
+            Vector3 t = new Vector3(width / 2, 1, length / 2) + suboffset;
             t = Vector3.Transform(t, r);
             vertices[0].Position = t + origin;
 
             // 1 
-            t = new Vector3(width / 2, 0, -length / 2) + suboffset;
+            t = new Vector3(width / 2, 1, -length / 2) + suboffset;
             t = Vector3.Transform(t, r);
             vertices[1].Position = t + origin;
 
             // 2
-            t = new Vector3(-width / 2, 0, -length / 2) + suboffset;
+            t = new Vector3(-width / 2, 1, -length / 2) + suboffset;
             t = Vector3.Transform(t, r);
             vertices[2].Position = t + origin;
 
             // 3
-            t = new Vector3(-width / 2, 0, length / 2) + suboffset;
+            t = new Vector3(-width / 2, 1, length / 2) + suboffset;
             t = Vector3.Transform(t, r);
             vertices[3].Position = t + origin;
 

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using C3.XNA;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
@@ -41,9 +40,9 @@ namespace Tank_Control.Game_Objects
                     shapeTransform =  Matrix.CreateScale(130) * Matrix.CreateTranslation(this.position);
                     break;
                 case 1:
-                    collide = new CircleCollidable(this.position, 130);
-                    this.position.Y += 133;
-                    shapeTransform = Matrix.CreateScale(50) * Matrix.CreateRotationX((float)Math.PI / 2) * Matrix.CreateTranslation(this.position);
+                    collide = new CircleCollidable(this.position, 265);
+                    this.position.Y += 253;
+                    shapeTransform = Matrix.CreateScale(100) * Matrix.CreateRotationX((float)Math.PI / 2) * Matrix.CreateTranslation(this.position);
                     break;
                 case 2:
                     collide = new CircleCollidable(this.position, 165);

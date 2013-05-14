@@ -46,7 +46,7 @@ namespace Tank_Control.Collidables
                 float x = (float)Math.Cos(a) * radius;
                 float y = (float)Math.Sin(a) * radius;
 
-                vertices[i].Position = new Vector3(origin.X + x, 0, origin.Z + y);
+                vertices[i].Position = new Vector3(origin.X + x, 1, origin.Z + y);
                 a += d;
             }
 

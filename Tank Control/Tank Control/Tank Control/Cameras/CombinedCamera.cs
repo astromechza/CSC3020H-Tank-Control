@@ -63,7 +63,7 @@ namespace Tank_Control.Cameras
                         Vector3 targetPosition = tank.getPosition() + pdiff;
 
                         // First person must not use tweaning, BUT needs tweaning when transitioning between cameras
-                        if (posTweanActive && Vector3.DistanceSquared(this.position, targetPosition) > 32f)
+                        if (posTweanActive && Vector3.DistanceSquared(this.position, targetPosition) > 64f)
                         {
                             this.position = Vector3.SmoothStep(this.position, targetPosition, looseness);
                         }
@@ -81,7 +81,7 @@ namespace Tank_Control.Cameras
                         Vector3 focusTarget = tank.getPosition() + Vector3.Transform(fdiff, fo);
                         if (focTweanActive && Vector3.DistanceSquared(this.focus, focusTarget) > 32f)
                         {
-                            this.focus = Vector3.SmoothStep(this.focus, focusTarget, looseness);
+                            this.focus = Vector3.SmoothStep(this.focus, focusTarget, 0.7f);
                         }
                         else
                         {
@@ -95,7 +95,7 @@ namespace Tank_Control.Cameras
                     {
                         // Calculate position
                         Vector3 tdiff = new Vector3(0, height, -distance);
-                        Matrix o = Matrix.CreateRotationY(tank.orientationAngle);
+                        Matrix o = Matrix.CreateRotationY(tank.orientationAngle+tank.turretAngle);
                         Vector3 targetPosition = tank.getPosition() + Vector3.Transform(tdiff, o);
                         this.position = Vector3.SmoothStep(this.position, targetPosition, looseness);
 
@@ -104,7 +104,7 @@ namespace Tank_Control.Cameras
                         Vector3 focusTarget = tank.getPosition() + new Vector3(0, 256f, 0);
                         if (focTweanActive && Vector3.DistanceSquared(this.focus, focusTarget) > 32f)
                         {
-                            this.focus = Vector3.SmoothStep(this.focus, focusTarget, looseness);
+                            this.focus = Vector3.SmoothStep(this.focus, focusTarget, 0.7f);
                         }
                         else
                         {
@@ -213,5 +213,73 @@ namespace Tank_Control.Cameras
         }
 
 
+        private bool ystatehold = false;
+        public void handleInput(GamePadState gs)
+        {
+            if (gs.IsButtonDown(Buttons.Y))
+            {
+                if (!ystatehold)
+                {
+
+                    switch (this.mode)
+                    {
+                        case CameraMode.FirstPerson:
+                            this.mode = CameraMode.ThirdPerson;
+                            posTweanActive = true;                      // reactivate tweaning
+                            focTweanActive = true;
+                            break;
+                        case CameraMode.ThirdPerson:
+                            this.mode = CameraMode.Orbitting;
+                            this.orbitAngle = tank.orientationAngle + tank.turretAngle;    // orbit must start at the 3rd person angle
+                            posTweanActive = true;                      // reactivate tweaning
+                            focTweanActive = true;
+                            break;
+                        case CameraMode.Orbitting:
+                            this.mode = CameraMode.FirstPerson;
+                            posTweanActive = true;                      // reactivate tweaning
+                            focTweanActive = true;
+                            break;
+
+
+                    }
+
+                    ystatehold = true;
+                }
+            }
+            else
+            {
+                ystatehold = false;
+            }
+
+
+
+            // Height and distance of camera
+            if (gs.IsButtonDown(Buttons.LeftTrigger))
+            {
+                distance = MathHelper.Clamp(distance + C_DELTADISTANCE, C_MINDISTANCE, C_MAXDISTANCE);
+            }
+            if (gs.IsButtonDown(Buttons.LeftShoulder))
+            {
+                distance = MathHelper.Clamp(distance - C_DELTADISTANCE, C_MINDISTANCE, C_MAXDISTANCE);
+            }
+
+            if (gs.IsButtonDown(Buttons.RightTrigger))
+            {
+                height = MathHelper.Clamp(height + C_DELTAHEIGHT, C_MINHEIGHT, C_MAXHEIGHT);
+            }
+            if (gs.IsButtonDown(Buttons.RightShoulder))
+            {
+                height = MathHelper.Clamp(height - C_DELTAHEIGHT, C_MINHEIGHT, C_MAXHEIGHT);
+            }
+
+            if (gs.IsButtonDown(Buttons.DPadUp))
+            {
+                looseness = MathHelper.Clamp(looseness + 0.005f, 0.05f, 0.9f);
+            }
+            if (gs.IsButtonDown(Buttons.DPadDown))
+            {
+                looseness = MathHelper.Clamp(looseness - 0.005f, 0.05f, 0.9f);
+            }
+        }
     }
 }

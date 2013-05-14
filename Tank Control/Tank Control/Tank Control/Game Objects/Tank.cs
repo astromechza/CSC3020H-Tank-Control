@@ -216,7 +216,7 @@ namespace Tank_Control.Game_Objects
 
                 // collision TIME!
                 bool didCollide = false;
-                List<RandomObject> possibles = game.quadTree.GetObjects(this.getRectangle());
+                List<RandomObject> possibles = game.randomObjects;
                 foreach( RandomObject ro in possibles)
                 {
                     if (this.getCollidable().collidesWith(ro.getCollidable()))
@@ -336,6 +336,53 @@ namespace Tank_Control.Game_Objects
 
         }
 
+        public void handleInput(GamePadState gs)
+        {
+
+            controlState.reset();
+            
+
+            if (gs.ThumbSticks.Left.X > 0)
+            {
+                controlState.steering = -1.0f;
+            }
+            else if (gs.ThumbSticks.Left.X < 0)
+            {
+                controlState.steering = 1.0f;
+            }
+
+
+            if (gs.ThumbSticks.Left.Y > 0)
+            {
+                controlState.moving = 1.0f;
+            }
+            else if (gs.ThumbSticks.Left.Y < 0)
+            {
+                controlState.moving = -1.0f;
+            }
+
+            if (gs.ThumbSticks.Right.X > 0)
+            {
+                controlState.turretRotating = -1.0f;
+            }
+            else if (gs.ThumbSticks.Right.X < 0)
+            {
+                controlState.turretRotating = 1.0f;
+            }
+
+
+            if (gs.ThumbSticks.Right.Y > 0)
+            {
+                controlState.gunTilting = 1.0f;
+            }
+            else if (gs.ThumbSticks.Right.Y < 0)
+            {
+                controlState.gunTilting = -1.0f;
+            }
+
+
+        }
+
         public Rectangle getRectangle()
         {
             return new Rectangle((int)this.position.X - 500, (int)this.position.Z - 500, 1000, 1000);
@@ -346,6 +393,8 @@ namespace Tank_Control.Game_Objects
             return new OARectangleCollidable(this.position, suboffset, this.orientationAngle, 600, 680);
         }
 
+
+       
     }
 
     // Store tank control states in a seperate class
