@@ -21,21 +21,19 @@ namespace Tank_Control
     {
         public GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-
+        PlatformID platform;
         Tank tank;
         Floor floor;
         FPSComponent fps;
         public QuadTree<RandomObject> quadTree;
-
-        LineDrawer ldrawer2;
-
-        RandomObject rob;
-
+        
         CombinedCamera camera;
 
         // View and Projection Matrices
         public Matrix viewMatrix;
         public Matrix projectionMatrix;
+
+        
 
         public Game()
         {
@@ -44,9 +42,6 @@ namespace Tank_Control
             graphics.PreferredBackBufferHeight = 720;
             graphics.PreferMultiSampling = true;
 
-            //graphics.SynchronizeWithVerticalRetrace = false;
-            //IsFixedTimeStep = false;
-
             Content.RootDirectory = "Content";
 
             fps = new FPSComponent(this);
@@ -54,10 +49,11 @@ namespace Tank_Control
             floor = new Floor(this, new Vector3(0, 0, 0), 512, 40, 40);
 
             quadTree = new QuadTree<RandomObject>(-10240, -10240, 512 * 40, 512 * 40);
-
-            ldrawer2 = new LineDrawer(this, new AARectangleCollidable(new Vector3(0, 0, 0), 512, 1024));
-
+            
             camera = new CombinedCamera(tank, CameraMode.ThirdPerson, new Vector3(0,10000,-10000f));
+
+            OperatingSystem os = Environment.OSVersion;
+            PlatformID platform = os.Platform;
         }
 
         protected override void Initialize()
@@ -67,22 +63,22 @@ namespace Tank_Control
 
             viewMatrix = camera.getViewMatrix();
 
-
+            Mouse.SetPosition(1280 / 2, 720 / 2);
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
+            System.Diagnostics.Debug.WriteLine("Started LoadContent");
             spriteBatch = new SpriteBatch(GraphicsDevice);
             tank.LoadContent(Content);
             floor.LoadContent(Content);
             fps.LoadContent(Content);
-
-            ldrawer2.init();
-
+            
+            RandomObject.PreLoad(Content);
+            ColliderDrawer.Init(this);
 
             Random r = new Random();
-
             for (int i = 0; i < 100; i++)
             {
 
@@ -95,10 +91,12 @@ namespace Tank_Control
                     continue;
                 }
 
-                RandomObject ro = new RandomObject(this, new Vector3(x, 0, z), r.Next(0, 3), r.Next(0, 4));
+                RandomObject ro = new RandomObject(this, new Vector3(x, 0, z));
                 ro.LoadContent(Content);
                 quadTree.Add(ro);
+                System.Diagnostics.Debug.WriteLine(i);
             }
+            System.Diagnostics.Debug.WriteLine("Finished LoadContent");
 
         }
 
@@ -117,7 +115,7 @@ namespace Tank_Control
 
             effect.DirectionalLight1.Enabled = true;
 
-            effect.DirectionalLight1.DiffuseColor = new Vector3(0.5f, 0.5f, 0.5f);
+            effect.DirectionalLight1.DiffuseColor = new Vector3(0.8f, 0.8f, 0.8f);
             effect.DirectionalLight1.SpecularColor = new Vector3(0.5f, 0.5f, 0.5f);
             effect.DirectionalLight1.Direction = new Vector3(-1, -0.1f, 0);
 
@@ -127,7 +125,7 @@ namespace Tank_Control
             effect.DirectionalLight2.SpecularColor = new Vector3(0.0f, 0.5f, 0.0f);
             effect.DirectionalLight2.Direction = Vector3.Transform(new Vector3(0, 0, 1), Matrix.CreateRotationY(tank.orientationAngle));
 
-            effect.SpecularPower = 100f;
+            effect.SpecularPower = 50f;
         }
 
         public void addFogToEffect(BasicEffect effect)
@@ -138,22 +136,58 @@ namespace Tank_Control
             effect.FogEnd = 8000;
         }
 
+        private bool tildeInKeyPress = false;
+        private void HandleInput()
+        {
+            if (platform == PlatformID.Xbox)
+            {
+                GamePadState gs = GamePad.GetState(PlayerIndex.One);
+                //tank.handleInput(gs);
+                //camera.handleInput(gs);
+            }
+            else
+            {
+                KeyboardState ks = Keyboard.GetState();
+                MouseState ms = Mouse.GetState();
+
+                tank.handleInput(ks, ms);
+                camera.handleInput(ks);
+                
+                if (ks.IsKeyDown(Keys.OemTilde))
+                {
+                    if (!tildeInKeyPress)
+                    {
+                        ColliderDrawer.Toggle();
+                        tildeInKeyPress = true;
+                    }
+                }
+                else
+                {
+                    tildeInKeyPress = false;
+                }
+
+                if (ks.IsKeyDown(Keys.Escape))
+                {
+                    this.Exit();
+                }
+
+                Mouse.SetPosition(1280 / 2, 720 / 2);
+            }
+        }
+
         protected override void Update(GameTime gameTime)
         {
 
-            double m = gameTime.ElapsedGameTime.TotalMilliseconds;
+            HandleInput();            
 
-            tank.handleInput();
-            camera.handleInput();
+            // Update sector
+            double m = gameTime.ElapsedGameTime.TotalMilliseconds;
 
             tank.Update(m);
             fps.Update(m);
-
-
-            ldrawer2.update(tank.getCollidable());
-
+            
+            // update camera and get new view matrix
             camera.UpdatePosition();
-
             viewMatrix = camera.getViewMatrix();
 
             base.Update(gameTime);
@@ -162,6 +196,7 @@ namespace Tank_Control
 
         protected override void Draw(GameTime gameTime)
         {
+            // clear to balck
             GraphicsDevice.Clear(Color.Black);
 
 
@@ -173,11 +208,10 @@ namespace Tank_Control
                 o.Draw();
             }
 
-            ldrawer2.Draw();
-
             fps.Draw();
 
             base.Draw(gameTime);
         }
+
     }
 }

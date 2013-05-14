@@ -5,29 +5,32 @@ using System.Text;
 using Microsoft.Xna.Framework.Graphics;
 using Tank_Control.Collidables;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 
 namespace Tank_Control.Dbg_Drawers
 {
-    public class LineDrawer
+    public class ColliderDrawer
     {
+
+        // we only want one effect drawer, thus it is static
+        private static BasicEffect effect;
+        private static bool readyForDraw = false;
+        private static bool enabled = false;
 
         private VertexPositionColor[] vertices;
         private short[] indices;
-        private BasicEffect effect;
         private Game game;
-        private bool readyForDraw = false;
 
-        public LineDrawer(Game g, Collidable source)
+        public ColliderDrawer(Game g, Collidable source)
         {
             game = g;
             vertices = source.getPolygonVertices();
             indices = source.getPolygonLineList();
         }
 
-        public void init()
+        public static void Init(Game game)
         {
             effect = new BasicEffect(game.GraphicsDevice);
-            effect.PreferPerPixelLighting = true;
             effect.World = Matrix.Identity;
             effect.DiffuseColor = Color.Red.ToVector3();
             readyForDraw = true;
@@ -41,7 +44,7 @@ namespace Tank_Control.Dbg_Drawers
 
         public void Draw()
         {
-            if (!readyForDraw) return;
+            if (!readyForDraw || !enabled) return;
             effect.View = game.viewMatrix;
             effect.Projection = game.projectionMatrix;
 
@@ -51,6 +54,22 @@ namespace Tank_Control.Dbg_Drawers
                 game.graphics.GraphicsDevice.DrawUserIndexedPrimitives<VertexPositionColor>(PrimitiveType.LineList, vertices, 0, vertices.Length, indices, 0, indices.Length / 2);
             }
         }
+
+        public static void Enable()
+        {
+            enabled = true;
+        }
+
+        public static void Disable()
+        {
+            enabled = false;
+        }
+
+        public static void Toggle()
+        {
+            enabled = !enabled;
+        }
+
 
     }
 }

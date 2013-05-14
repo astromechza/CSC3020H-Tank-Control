@@ -155,9 +155,8 @@ namespace Tank_Control.Cameras
         /**
          * HandleInput: switch camera modes and activate tweaning between them
          */
-        public void handleInput()
+        public void handleInput(KeyboardState currentKeyboardState)
         {
-            KeyboardState currentKeyboardState = Keyboard.GetState();
 
             // SWITCH camera
             if (currentKeyboardState.IsKeyDown(Keys.D1))

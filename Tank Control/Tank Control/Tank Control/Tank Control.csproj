@@ -113,8 +113,7 @@
     <Compile Include="Collidables\AARectangleCollidable.cs" />
     <Compile Include="Collidables\OARectangleCollidable.cs" />
     <Compile Include="Collidables\Utils.cs" />
-    <Compile Include="Dbg Drawers\LineDrawer.cs" />
-    <Compile Include="Dbg Drawers\RectangleDrawer.cs" />
+    <Compile Include="Dbg Drawers\ColliderDrawer.cs" />
     <Compile Include="Game Objects\Floor.cs" />
     <Compile Include="Game Objects\GameObject.cs" />
     <Compile Include="Game Objects\RandomObject.cs" />

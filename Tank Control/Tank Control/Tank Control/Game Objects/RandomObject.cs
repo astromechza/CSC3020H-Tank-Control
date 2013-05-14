@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 using Tank_Control.Collidables;
+using Tank_Control.Dbg_Drawers;
 
 namespace Tank_Control.Game_Objects
 {
@@ -18,35 +19,34 @@ namespace Tank_Control.Game_Objects
         int type;
         int textype;
         Collidable collide;
+        ColliderDrawer colliderDrawer;
         
-        public RandomObject(Game g, Vector3 o, int type, int textype) : base(g, o)
+        public RandomObject(Game g, Vector3 o) : base(g, o)
         {
-            this.textype = textype;
-            this.type = type;
+            this.textype = rsource.Next(0,loadedTextures.Length);
+            this.type = rsource.Next(0, loadedModels.Length);
         }
 
         public override void LoadContent(ContentManager contentMan)
         {
 
             Matrix shapeTransform = Matrix.Identity;
+            model = loadedModels[type];
             
             switch (type)
             {
                 case 0:
-                    model = contentMan.Load<Model>("Cube");
-                    collide = new AARectangleCollidable(this.position, 480);
+                    collide = new AARectangleCollidable(this.position, 485);
                     this.position.Y += 220;
                     shapeTransform =  Matrix.CreateScale(130) * Matrix.CreateTranslation(this.position);
                     break;
                 case 1:
-                    model = contentMan.Load<Model>("Cone");
-                    collide = new CircleCollidable(this.position, 100);
+                    collide = new CircleCollidable(this.position, 130);
                     this.position.Y += 133;
                     shapeTransform = Matrix.CreateScale(50) * Matrix.CreateRotationX((float)Math.PI / 2) * Matrix.CreateTranslation(this.position);
                     break;
                 case 2:
-                    model = contentMan.Load<Model>("Cylinder");
-                    collide = new CircleCollidable(this.position, 160);
+                    collide = new CircleCollidable(this.position, 165);
                     this.position.Y += 190;
                     shapeTransform = Matrix.CreateScale(80) * Matrix.CreateRotationX((float)Math.PI / 2) * Matrix.CreateTranslation(this.position);
                     break;
@@ -58,21 +58,9 @@ namespace Tank_Control.Game_Objects
                 boneOriginTransforms[i] = model.Bones[i].Transform * shapeTransform;
             }
 
-            switch (textype)
-            {
-                case 0:
-                    tex = contentMan.Load<Texture2D>("hazard");
-                    break;
-                case 1:
-                    tex = contentMan.Load<Texture2D>("rocks");
-                    break;
-                case 2:
-                    tex = contentMan.Load<Texture2D>("crate");
-                    break;
-                case 3:
-                    tex = contentMan.Load<Texture2D>("chess");
-                    break;
-            }
+            tex = loadedTextures[textype];
+            
+            colliderDrawer = new ColliderDrawer(this.game, this.getCollidable());
 
         }
 
@@ -97,6 +85,8 @@ namespace Tank_Control.Game_Objects
                 }
                 mesh.Draw();
             }
+
+            colliderDrawer.Draw();
         }
 
         public override void Update(double elapsedMillis) { }
@@ -111,5 +101,38 @@ namespace Tank_Control.Game_Objects
             return collide;
         }
 
+        //// STATIC SECTION
+        private static String[] modelNames = new String[] { "Cube", "Cone", "Cylinder",  };
+        private static String[] textureNames = new String[] { "chess", "crate", "hazard", "rocks" };
+
+        private static Model[] loadedModels;
+        private static Texture2D[] loadedTextures;
+        private static Random rsource; 
+
+        public static void PreLoad(ContentManager Content)
+        {
+            System.Diagnostics.Debug.WriteLine("Start PreLoad");
+            // Load Models
+            loadedModels = new Model[modelNames.Length];
+
+            for (int i = 0; i < modelNames.Length; i++)
+            {
+                loadedModels[i] = Content.Load<Model>(modelNames[i]);
+            }
+
+            // Load Textures            
+            loadedTextures = new Texture2D[textureNames.Length];
+
+            for (int i = 0; i < textureNames.Length; i++)
+            {
+                loadedTextures[i] = Content.Load<Texture2D>(textureNames[i]);
+            }
+
+            // make random source
+            rsource = new Random();
+            System.Diagnostics.Debug.WriteLine("End PreLoad");
+        }
     }
+
+    
 }

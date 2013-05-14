@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Tank_Control.Collidables;
+using Tank_Control.Dbg_Drawers;
 
 namespace Tank_Control.Game_Objects
 {
@@ -63,20 +64,19 @@ namespace Tank_Control.Game_Objects
         Vector3 localVelocity = Vector3.Zero;
         Vector3 velocity = Vector3.Zero;
 
-        public float turretAngle = 0.0f;
-        public float gunAngle = 0.0f;
 
         // Model angles
+        public float turretAngle = 0.0f;
+        public float gunAngle = 0.0f;
         float steerAngle = 0.0f;
         public float orientationAngle = 0.0f;
-
         float[] wheelrotations = new float[4];
-        // 
 
         private Vector3 suboffset = new Vector3(0, 0, -25);
-
         private Vector3 lastGoodPosition = new Vector3(0, 0, 0);
         private float lastGoodOrientation = 0.0f;
+
+        private ColliderDrawer cdrawer;
 
         public Tank(Game g, Vector3 p) : base(g, p)
         {
@@ -85,6 +85,8 @@ namespace Tank_Control.Game_Objects
             wheelrotations[1] = 0;
             wheelrotations[2] = 0;
             wheelrotations[3] = 0;
+
+            cdrawer = new ColliderDrawer(g, this.getCollidable());
         }
 
         /* LoadContent
@@ -131,44 +133,34 @@ namespace Tank_Control.Game_Objects
                 }
                 mesh.Draw();
             }
+
+            cdrawer.Draw();
         }
 
         public override void Update(double elapsedMillis)
         {
 
             // Rotate turret if it should be rotating
-            if (controlState.turretRotatingLeft)
+            if (controlState.turretRotating != 0.0f)
             {
-                turretAngle += 0.05f;
-            }
-            else if (controlState.turretRotatingRight)
-            {
-                turretAngle -= 0.05f;
+                turretAngle += 0.05f * controlState.turretRotating;
             }
             // apply current turret rotation to turret bone
             bones[TURRET_GEO].Transform = Matrix.CreateRotationY(turretAngle) * boneOriginTransforms[TURRET_GEO];
 
             // Raise / Lower Gun depending on key
-            if (controlState.gunMovingUp)
+            if (controlState.gunTilting != 0.0f)
             {
-                gunAngle = MathHelper.Clamp(gunAngle + C_GUNANGLESPEED, C_GUNMINANGLE, C_GUNMAXANGLE);
-            }
-            else if (controlState.gunMovingDown)
-            {
-                gunAngle = MathHelper.Clamp(gunAngle - C_GUNANGLESPEED, C_GUNMINANGLE, C_GUNMAXANGLE);
+                gunAngle = MathHelper.Clamp(gunAngle + C_GUNANGLESPEED * controlState.gunTilting, C_GUNMINANGLE, C_GUNMAXANGLE);
             }
             // Apply gun pitch to bone
             bones[CANON_GEO].Transform = Matrix.CreateRotationX(gunAngle) * boneOriginTransforms[CANON_GEO];
 
             // If a steering key is down, modify the steering angle
-            if (controlState.isSteeringLeft)
+            if (controlState.steering != 0.0f)
             {
-                steerAngle = MathHelper.Clamp(steerAngle + C_STEERSPEED, -C_MAXSTEER, C_MAXSTEER);
+                steerAngle = MathHelper.Clamp(steerAngle + C_STEERSPEED * controlState.steering, -C_MAXSTEER, C_MAXSTEER);
             }
-            else if (controlState.isSteeringRight)
-            {
-                steerAngle = MathHelper.Clamp(steerAngle - C_STEERSPEED, -C_MAXSTEER, C_MAXSTEER);
-            } 
             else 
             {
                 // Otherwise, decay the steering angle close to 0
@@ -187,13 +179,9 @@ namespace Tank_Control.Game_Objects
             bones[L_STEER_GEO].Transform = Matrix.CreateRotationY(steerAngle) * boneOriginTransforms[L_STEER_GEO];
 
             // If a movement key is being held down then accelerate
-            if (controlState.isMovingForward)           // Accelerate forward
+            if (controlState.moving != 0.0f)           // Accelerate forward
             {
-                localVelocity.Z = MathHelper.Clamp(localVelocity.Z + C_ACCELERATION, C_MAXBACKWARDSPEED, C_MAXFORWARDSPEED);
-            }
-            else if (controlState.isMovingBackward)     // Accelerate backward
-            {
-                localVelocity.Z = MathHelper.Clamp(localVelocity.Z - C_ACCELERATION, C_MAXBACKWARDSPEED, C_MAXFORWARDSPEED);
+                localVelocity.Z = MathHelper.Clamp(localVelocity.Z + C_ACCELERATION * controlState.moving, C_MAXBACKWARDSPEED, C_MAXFORWARDSPEED);
             }
             else // deccelerate to 0
             {
@@ -236,7 +224,6 @@ namespace Tank_Control.Game_Objects
                         didCollide = true;
                         break;
                     }
-
                 }
 
                 if (didCollide)
@@ -253,8 +240,9 @@ namespace Tank_Control.Game_Objects
                     position += velocity;
                 }
                 orientation = Matrix.CreateRotationY(orientationAngle);
-            }
 
+                cdrawer.update(this.getCollidable());
+            }
 
             // back wheels
             if (localVelocity.Z > 0)
@@ -283,51 +271,66 @@ namespace Tank_Control.Game_Objects
             currentTransformNeedsRebuild = true;
         }
 
-        public void handleInput()
+        //Input handling for Keyboard
+        public void handleInput(KeyboardState ks, MouseState ms)
         {
-            KeyboardState currentKeyboardState = Keyboard.GetState();
-
             controlState.reset();
-            if (currentKeyboardState.IsKeyDown(Keys.A))
+
+            if (ks.IsKeyDown(Keys.A))
             {
-                controlState.isSteeringLeft = true;
+                controlState.steering = 1.0f;
+            }
+            else if (ks.IsKeyDown(Keys.D))
+            {
+                controlState.steering = -1.0f;
             }
 
-            if (currentKeyboardState.IsKeyDown(Keys.D))
+
+            if (ks.IsKeyDown(Keys.W))
             {
-                controlState.isSteeringRight = true;
+                controlState.moving = 1.0f;
+            }
+            else if (ks.IsKeyDown(Keys.S))
+            {
+                controlState.moving = -1.0f;
             }
 
-            if (currentKeyboardState.IsKeyDown(Keys.W))
+
+            if (ks.IsKeyDown(Keys.Left))
             {
-                controlState.isMovingForward = true;
+                controlState.turretRotating = 1.0f;
+            }
+            else if (ks.IsKeyDown(Keys.Right))
+            {
+                controlState.turretRotating = -1.0f;
             }
 
-            if (currentKeyboardState.IsKeyDown(Keys.S))
+            if (ms.X < 640)
             {
-                controlState.isMovingBackward = true;
+                controlState.turretRotating = (640 - ms.X) / 20.0f;
+            }
+            else if (ms.X > 640)
+            {
+                controlState.turretRotating = (640 - ms.X) / 20.0f;
             }
 
-            if (currentKeyboardState.IsKeyDown(Keys.Left))
+            if (ks.IsKeyDown(Keys.Up))
             {
-                controlState.turretRotatingLeft = true;
+                controlState.gunTilting = 1.0f;
+            }
+            else if (ks.IsKeyDown(Keys.Down))
+            {
+                controlState.gunTilting = -1.0f;
             }
 
-            if (currentKeyboardState.IsKeyDown(Keys.Right))
+            if (ms.Y < 360)
             {
-                controlState.turretRotatingRight = true;
+                controlState.gunTilting = (360 - ms.Y) / -50.0f;
             }
-
-            if (currentKeyboardState.IsKeyDown(Keys.Up))
+            else if (ms.Y > 360)
             {
-                controlState.gunMovingUp = true;
+                controlState.gunTilting = (360 - ms.Y) / -50.0f;
             }
-
-            if (currentKeyboardState.IsKeyDown(Keys.Down))
-            {
-                controlState.gunMovingDown = true;
-            }
-
 
         }
 
@@ -343,23 +346,24 @@ namespace Tank_Control.Game_Objects
 
     }
 
+    // Store tank control states in a seperate class
     public class TankControlState
     {
-        // movement
-        public bool isSteeringLeft, isSteeringRight, isMovingForward, isMovingBackward;
-        // turret
-        public bool turretRotatingLeft, turretRotatingRight, gunMovingUp, gunMovingDown = false;
+        public float steering = 0.0f;
+        public float moving = 0.0f;
+
+        public float turretRotating = 0.0f;
+        public float gunTilting = 0.0f;
 
         public TankControlState()
         {
-            isSteeringLeft = isSteeringRight = isMovingBackward = isMovingForward = false;
-            turretRotatingLeft = turretRotatingRight = gunMovingUp = gunMovingDown = false;
+            reset();
         }
 
         public void reset()
         {
-            isSteeringLeft = isSteeringRight = isMovingBackward = isMovingForward = false;
-            turretRotatingLeft = turretRotatingRight = gunMovingUp = gunMovingDown = false;
+            steering = moving = 0.0f;
+            turretRotating = gunTilting = 0.0f;
         }
     }
 }
