@@ -32,7 +32,7 @@ namespace Tank_Control.Dbg_Drawers
         {
             effect = new BasicEffect(game.GraphicsDevice);
             effect.World = Matrix.Identity;
-            effect.DiffuseColor = Color.Red.ToVector3();
+            effect.DiffuseColor = Color.Yellow.ToVector3();
             readyForDraw = true;
         }
 

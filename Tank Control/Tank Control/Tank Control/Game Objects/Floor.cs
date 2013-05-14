@@ -82,10 +82,11 @@ namespace Tank_Control.Game_Objects
             quadEffect.Projection = game.projectionMatrix;
             
             foreach (EffectPass pass in quadEffect.CurrentTechnique.Passes)
-            {                
+            {
                 pass.Apply();
-                game.graphics.GraphicsDevice.DrawUserIndexedPrimitives<VertexPositionNormalTexture> (PrimitiveType.TriangleList, vertices, 0, vertices.Length, indices, 0, indices.Length/3); 
+                game.graphics.GraphicsDevice.DrawUserIndexedPrimitives<VertexPositionNormalTexture>(PrimitiveType.TriangleList, vertices, 0, vertices.Length, indices, 0, indices.Length / 3);
             }
+            
         }
 
         public override void Update(double elapsedMillis)

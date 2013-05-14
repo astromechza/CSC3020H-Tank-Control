@@ -307,11 +307,11 @@ namespace Tank_Control.Game_Objects
 
             if (ms.X < 640)
             {
-                controlState.turretRotating = (640 - ms.X) / 20.0f;
+                controlState.turretRotating = (640 - ms.X) / 30.0f;
             }
             else if (ms.X > 640)
             {
-                controlState.turretRotating = (640 - ms.X) / 20.0f;
+                controlState.turretRotating = (640 - ms.X) / 30.0f;
             }
 
             if (ks.IsKeyDown(Keys.Up))
@@ -325,12 +325,14 @@ namespace Tank_Control.Game_Objects
 
             if (ms.Y < 360)
             {
-                controlState.gunTilting = (360 - ms.Y) / -50.0f;
+                controlState.gunTilting = (360 - ms.Y) / -30.0f;
             }
             else if (ms.Y > 360)
             {
-                controlState.gunTilting = (360 - ms.Y) / -50.0f;
+                controlState.gunTilting = (360 - ms.Y) / -30.0f;
             }
+
+            
 
         }
 

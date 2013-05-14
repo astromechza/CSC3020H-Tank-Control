@@ -24,17 +24,17 @@ namespace Tank_Control.Cameras
 
         const float C_ORBITSPEED = 0.01f;
 
-        const float C_TWEAN = 0.2f;
 
         /* MOVEMENT INITIAL */
-        float height = 1024f;
-        float distance = 1536;
+        public float height = 1024f;
+        public float distance = 1536;
+        public float looseness = 0.2f;
         float orbitAngle = 0f;
 
         Vector3 focus;
         Vector3 position;
         Tank tank;
-        CameraMode mode;
+        public CameraMode mode;
         bool posTweanActive = true;
         bool focTweanActive = true;
 
@@ -65,7 +65,7 @@ namespace Tank_Control.Cameras
                         // First person must not use tweaning, BUT needs tweaning when transitioning between cameras
                         if (posTweanActive && Vector3.DistanceSquared(this.position, targetPosition) > 32f)
                         {
-                            this.position = Vector3.SmoothStep(this.position, targetPosition, C_TWEAN);
+                            this.position = Vector3.SmoothStep(this.position, targetPosition, looseness);
                         }
                         else
                         {
@@ -81,7 +81,7 @@ namespace Tank_Control.Cameras
                         Vector3 focusTarget = tank.getPosition() + Vector3.Transform(fdiff, fo);
                         if (focTweanActive && Vector3.DistanceSquared(this.focus, focusTarget) > 32f)
                         {
-                            this.focus = Vector3.SmoothStep(this.focus, focusTarget, C_TWEAN);
+                            this.focus = Vector3.SmoothStep(this.focus, focusTarget, looseness);
                         }
                         else
                         {
@@ -97,14 +97,14 @@ namespace Tank_Control.Cameras
                         Vector3 tdiff = new Vector3(0, height, -distance);
                         Matrix o = Matrix.CreateRotationY(tank.orientationAngle);
                         Vector3 targetPosition = tank.getPosition() + Vector3.Transform(tdiff, o);
-                        this.position = Vector3.SmoothStep(this.position, targetPosition, C_TWEAN);
+                        this.position = Vector3.SmoothStep(this.position, targetPosition, looseness);
 
                         // FOCUS
 
                         Vector3 focusTarget = tank.getPosition() + new Vector3(0, 256f, 0);
                         if (focTweanActive && Vector3.DistanceSquared(this.focus, focusTarget) > 32f)
                         {
-                            this.focus = Vector3.SmoothStep(this.focus, focusTarget, C_TWEAN);
+                            this.focus = Vector3.SmoothStep(this.focus, focusTarget, looseness);
                         }
                         else
                         {
@@ -120,13 +120,13 @@ namespace Tank_Control.Cameras
                         Vector3 odiff = new Vector3(0, height, -distance);
                         Matrix oo = Matrix.CreateRotationY(orbitAngle);
                         Vector3 orbitPosition = tank.getPosition() + Vector3.Transform(odiff, oo);
-                        this.position = Vector3.SmoothStep(this.position, orbitPosition, C_TWEAN);
+                        this.position = Vector3.SmoothStep(this.position, orbitPosition, looseness);
 
                         // FOCUS
                         Vector3 focusTarget = tank.getPosition() + new Vector3(0, 256f, 0);
                         if (focTweanActive && Vector3.DistanceSquared(this.focus, focusTarget) > 32f)
                         {
-                            this.focus = Vector3.SmoothStep(this.focus, focusTarget, C_TWEAN);
+                            this.focus = Vector3.SmoothStep(this.focus, focusTarget, looseness);
                         }
                         else
                         {
@@ -200,6 +200,14 @@ namespace Tank_Control.Cameras
                 height = MathHelper.Clamp(height - C_DELTAHEIGHT, C_MINHEIGHT, C_MAXHEIGHT);
             }
 
+            if (currentKeyboardState.IsKeyDown(Keys.U))
+            {
+                looseness = MathHelper.Clamp(looseness + 0.005f, 0.05f, 0.9f);
+            }
+            if (currentKeyboardState.IsKeyDown(Keys.J))
+            {
+                looseness = MathHelper.Clamp(looseness - 0.005f, 0.05f, 0.9f);
+            }
 
 
         }

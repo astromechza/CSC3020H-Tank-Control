@@ -24,10 +24,10 @@ namespace Tank_Control
         PlatformID platform;
         Tank tank;
         Floor floor;
-        FPSComponent fps;
+        HudOverlay hud;
         public QuadTree<RandomObject> quadTree;
         
-        CombinedCamera camera;
+        public CombinedCamera camera;
 
         // View and Projection Matrices
         public Matrix viewMatrix;
@@ -44,7 +44,7 @@ namespace Tank_Control
 
             Content.RootDirectory = "Content";
 
-            fps = new FPSComponent(this);
+            hud = new HudOverlay(this);
             tank = new Tank(this, new Vector3(0,0,0));
             floor = new Floor(this, new Vector3(0, 0, 0), 512, 40, 40);
 
@@ -53,7 +53,7 @@ namespace Tank_Control
             camera = new CombinedCamera(tank, CameraMode.ThirdPerson, new Vector3(0,10000,-10000f));
 
             OperatingSystem os = Environment.OSVersion;
-            PlatformID platform = os.Platform;
+            platform = os.Platform;
         }
 
         protected override void Initialize()
@@ -73,7 +73,7 @@ namespace Tank_Control
             spriteBatch = new SpriteBatch(GraphicsDevice);
             tank.LoadContent(Content);
             floor.LoadContent(Content);
-            fps.LoadContent(Content);
+            hud.LoadContent(Content);
             
             RandomObject.PreLoad(Content);
             ColliderDrawer.Init(this);
@@ -94,7 +94,6 @@ namespace Tank_Control
                 RandomObject ro = new RandomObject(this, new Vector3(x, 0, z));
                 ro.LoadContent(Content);
                 quadTree.Add(ro);
-                System.Diagnostics.Debug.WriteLine(i);
             }
             System.Diagnostics.Debug.WriteLine("Finished LoadContent");
 
@@ -184,7 +183,7 @@ namespace Tank_Control
             double m = gameTime.ElapsedGameTime.TotalMilliseconds;
 
             tank.Update(m);
-            fps.Update(m);
+            hud.Update(m);
             
             // update camera and get new view matrix
             camera.UpdatePosition();
@@ -200,6 +199,7 @@ namespace Tank_Control
             GraphicsDevice.Clear(Color.Black);
 
 
+
             floor.Draw();
             tank.Draw();
             List<RandomObject> ol = quadTree.GetAllObjects();
@@ -208,7 +208,7 @@ namespace Tank_Control
                 o.Draw();
             }
 
-            fps.Draw();
+            hud.Draw();
 
             base.Draw(gameTime);
         }
