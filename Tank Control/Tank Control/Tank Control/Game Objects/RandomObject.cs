@@ -11,7 +11,7 @@ using Tank_Control.Dbg_Drawers;
 
 namespace Tank_Control.Game_Objects
 {
-    public class RandomObject : GameObject, IQuadStorable
+    public class RandomObject : GameObject
     {
         Texture2D tex;
         Model model;

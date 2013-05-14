@@ -25,7 +25,7 @@ namespace Tank_Control
         Tank tank;
         Floor floor;
         HudOverlay hud;
-        public QuadTree<RandomObject> quadTree;
+        public QuadTree quadTree;
         
         public CombinedCamera camera;
 
@@ -48,7 +48,7 @@ namespace Tank_Control
             tank = new Tank(this, new Vector3(0,0,0));
             floor = new Floor(this, new Vector3(0, 0, 0), 512, 40, 40);
 
-            quadTree = new QuadTree<RandomObject>(-10240, -10240, 512 * 40, 512 * 40);
+            quadTree = new QuadTree(-10240, -10240, 512 * 40, 512 * 40);
             
             camera = new CombinedCamera(tank, CameraMode.ThirdPerson, new Vector3(0,10000,-10000f));
 
